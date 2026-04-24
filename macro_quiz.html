@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中级宏观经济学刷题</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#222535;--bg4:#2a2e42;
+  --text:#e8eaf0;--text2:#9ba3bf;--text3:#6b7494;
+  --border:#2e3350;--border2:#3d4570;
+  --green:#3dba7c;--green-bg:#0d2d1e;--green-dim:#1a4a32;
+  --red:#e05a5a;--red-bg:#2d0d0d;--red-dim:#4a1a1a;
+  --blue:#4e7ef7;--amber:#f5a623;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+a{color:var(--blue)}
+/* LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden}
+/* SIDEBAR */
+.sidebar{width:240px;min-width:240px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-header{padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+.app-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.app-sub{font-size:11px;color:var(--text3)}
+.chapter-list{padding:8px 0;flex:1}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--text2);position:relative}
+.chapter-item:hover{background:var(--bg3)}
+.chapter-item.active{background:var(--bg3);color:var(--text)}
+.chapter-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.chapter-name{flex:1;font-size:13px}
+.chapter-count{font-size:11px;color:var(--text3)}
+.chapter-prog{position:absolute;bottom:0;left:0;height:2px;background:var(--green);opacity:.6;transition:width .3s}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.mixed-btn{width:100%;padding:8px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
+.mixed-btn:hover{background:var(--bg3);color:var(--text)}
+.mixed-btn.active{background:var(--bg4);color:var(--text);border-color:var(--blue)}
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg2);flex-wrap:wrap}
+.chapter-tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--bg4)}
+.score-display{font-size:13px;color:var(--text2);margin-left:auto}
+.score-num{color:var(--text);font-weight:600}
+.ctrl-btns{display:flex;gap:6px}
+.ctrl-btn{font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.ctrl-btn:hover{background:var(--bg3);color:var(--text)}
+.ctrl-btn.on{background:var(--bg4);color:var(--text);border-color:var(--blue)}
+/* PROGRESS */
+.prog-wrap{height:3px;background:var(--border);position:relative}
+.prog-fill{height:100%;background:var(--green);transition:width .4s;position:relative}
+/* QUESTION */
+.qcard{flex:1;padding:28px 24px;max-width:780px;width:100%;margin:0 auto}
+.qnum{font-size:12px;color:var(--text3);margin-bottom:10px}
+.qtxt{font-size:16px;color:var(--text);line-height:1.7;margin-bottom:22px;font-weight:400}
+.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:all .15s;text-align:left;font-size:14px;color:var(--text2);width:100%;line-height:1.55}
+.opt:hover:not([disabled]){border-color:var(--border2);background:var(--bg3);color:var(--text)}
+.opt[disabled]{cursor:default}
+.opt-lbl{font-weight:600;min-width:20px;font-size:13px;opacity:.7}
+.opt.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.opt.correct .opt-lbl{color:var(--green);opacity:1}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.opt.wrong .opt-lbl{color:var(--red);opacity:1}
+.opt.reveal{border-color:var(--green);background:var(--green-dim)}
+.opt.reveal .opt-lbl{color:var(--green);opacity:1}
+/* FEEDBACK */
+.fb{font-size:14px;min-height:20px;margin-bottom:16px;color:var(--text3)}
+.fb.ok{color:var(--green)}
+.fb.no{color:var(--red)}
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--border);margin-top:8px}
+.nav-btn{padding:9px 20px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;transition:all .15s}
+.nav-btn:hover:not([disabled]){background:var(--bg3);color:var(--text)}
+.nav-btn[disabled]{opacity:.3;cursor:default}
+.nav-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.nav-btn.primary:hover:not([disabled]){opacity:.85}
+/* END SCREEN */
+.end{padding:40px 24px;max-width:600px;margin:0 auto;text-align:center}
+.end-pct{font-size:56px;font-weight:700;line-height:1.1;margin-bottom:8px}
+.end-grade{font-size:16px;color:var(--text2);margin-bottom:28px}
+.end-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.end-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.end-n{font-size:26px;font-weight:700}
+.end-l{font-size:11px;color:var(--text3);margin-top:3px}
+.end-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+/* WELCOME */
+.welcome{padding:40px 24px;max-width:600px;margin:0 auto;text-align:center}
+.welcome h1{font-size:28px;font-weight:700;margin-bottom:8px}
+.welcome p{color:var(--text2);font-size:15px;margin-bottom:28px}
+.chapter-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:28px;text-align:left}
+.ccard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s}
+.ccard:hover{border-color:var(--border2);background:var(--bg3)}
+.ccard-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.ccard-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.ccard-count{font-size:12px;color:var(--text3)}
+/* RESPONSIVE */
+@media(max-width:620px){
+  .sidebar{display:none}
+  .chapter-cards{grid-template-columns:1fr}
+  .end-cards{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="app-title">宏观经济学</div>
+      <div class="app-sub">7章 · 选择题刷题</div>
+    </div>
+    <div class="chapter-list" id="chapterList"></div>
+    <div class="sidebar-footer">
+      <button class="mixed-btn" id="mixedBtn" onclick="startMixed()">🔀 混合练习（全部章节）</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar" id="topbar" style="display:none">
+      <span class="chapter-tag" id="chapterTag">—</span>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()">乱序</button>
+        <button class="ctrl-btn" id="wrongBtn" onclick="toggleWrong()">错题本 <span id="wrongCount"></span></button>
+      </div>
+      <div class="score-display">答对 <span class="score-num" id="scoreNum">0</span> / <span class="score-num" id="totalNum">0</span></div>
+    </div>
+    <div class="prog-wrap" id="progWrap" style="display:none"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+</script>
+<script src="/dev/null" id="dataScript"></script>
+<script>
+const CHAPTERS = [
+{id:1,title:"Ch.1 宏观经济学导论",color:"#3B6D11",
+questions:[
+{q:"Macroeconomics does not try to answer the question of:",o:["why some countries experience rapid growth.","what is the rate of return on education.","why some countries have high rates of inflation.","what causes recessions and depressions."],a:1},
+{q:"A typical trend during a recession is that:",o:["the unemployment rate falls.","the popularity of the incumbent president rises.","incomes fall.","the inflation rate rises."],a:2},
+{q:"Macroeconomics is the study of the:",o:["activities of individual units of the economy.","decisionmaking by households and firms.","economy as a whole.","interaction of firms and households in the marketplace."],a:2},
+{q:"The study of the economy as a whole is called:",o:["household economics.","business economics.","microeconomics.","macroeconomics."],a:3},
+{q:"The ability of macroeconomists to predict the future course of economic events:",o:["is no better than a meteorologist's ability to predict the next month's weather.","is much better than a meteorologist's ability to predict the next month's weather.","has gotten worse over time.","is less precise than it was in the 1920s."],a:0},
+{q:"Which of the combinations listed is NOT a U.S. president and an important economic issue of his administration?",o:["President Carter, inflation","President Reagan, budget deficits","President G. H. W. Bush, budget deficits","President Clinton, inflation"],a:3},
+{q:"All of the following are types of macroeconomics data EXCEPT the:",o:["price of a computer.","growth rate of real GDP.","inflation rate.","unemployment rate."],a:0},
+{q:"All of the following EXCEPT _______ are important macroeconomic variables.",o:["real GDP","the unemployment rate","the marginal rate of substitution","the inflation rate"],a:2},
+{q:"The total income of everyone in the economy adjusted for the level of base year prices is called:",o:["a recession.","an inflation.","real GDP.","a business fluctuation."],a:2},
+{q:"A measure of how fast the general level of prices is rising is called the:",o:["growth rate of real GDP.","inflation rate.","unemployment rate.","market-clearing rate."],a:1},
+{q:"The inflation rate is a measure of how fast:",o:["the total income of the economy is growing.","unemployment in the economy is increasing.","the general level of prices in the economy is rising.","the number of jobs in the economy is expanding."],a:2},
+{q:"Real GDP ______ over time, and the growth rate of real GDP ______.",o:["grows; fluctuates","is steady; is steady","grows; is steady","is steady; fluctuates"],a:0},
+{q:"Two striking features of a graph of U.S. real GDP per capita over the twentieth century are the:",o:["overall upward trend interrupted by a large downturn due to the economic depression in the 1930s.","nearly constant level with a large downturn in the 1930s.","downward trend in the first half of the century followed by the upward trend in the second half.","constant level in the first half of the century followed by the upward trend in the second half."],a:0},
+{q:"In the U.S. economy today, real GDP per person, compared with its level in 1900, is about:",o:["50 percent higher.","twice as high.","three times as high.","eight times as high."],a:3},
+{q:"Recessions are periods when real GDP:",o:["increases slowly.","increases rapidly.","decreases mildly.","decreases severely."],a:2},
+{q:"Compared with real GDP during a recession, real GDP during a depression:",o:["increases more rapidly.","increases at approximately the same rate.","decreases at approximately the same rate.","decreases more severely."],a:3},
+{q:"A severe recession is called a(n):",o:["depression.","deflation.","exogenous event.","market-clearing assumption."],a:0},
+{q:"The annual inflation rate in the United States averaged:",o:["nearly zero between 1900 and 1950.","nearly zero between 1950 and 2000.","about 10 percent between 1900 and 1950.","about 10 percent between 1950 and 2000."],a:0},
+{q:"Deflation occurs when:",o:["real GDP decreases.","the unemployment rate decreases.","prices fall.","prices increase but at a slower rate."],a:2},
+{q:"A period of falling prices is called:",o:["deflation.","inflation.","a depression.","a recession."],a:0},
+{q:"A graph of the rate of inflation in the United States over the twentieth century shows:",o:["an overall upward trend interrupted by a large downturn in the 1930s.","some periods of deflation mixed with mostly positive rates of inflation before 1955 but only positive rates of inflation after 1955.","a relatively steady, positive level throughout the century except for deflation in the 1930s.","a constant rate of inflation in the first half of the century followed by an upward trend in the second half."],a:1},
+{q:"A graph of the U.S. unemployment rate over the twentieth century shows:",o:["an overall upward trend in the unemployment rate interrupted by a large upturn in the 1930s.","an overall downward trend in the unemployment rate interrupted by a large upturn in the 1930s.","rates of unemployment always greater than zero with substantial variations from year to year.","alternating periods of positive and negative rates of unemployment."],a:2},
+{q:"During the period between 1900 and 2000, the unemployment rate in the United States was highest in the:",o:["1920s.","1930s.","1970s.","1980s."],a:1},
+{q:"The unemployment rate:",o:["was zero during the 1990s in the United States.","was zero on average between 1900 and 1950 in the United States.","has never been zero in the United States.","is usually zero when the economy is not in a recession or depression."],a:2},
+{q:"Exogenous variables are:",o:["determined outside the model.","determined within the model.","the outputs of the model.","explained by the model."],a:0},
+{q:"Endogenous variables are:",o:["fixed at the moment they enter the model.","determined within the model.","the inputs of the model.","from outside the model."],a:1},
+{q:"In an economic model:",o:["exogenous variables and endogenous variables are both determined outside the model.","endogenous variables and exogenous variables are both determined within the model.","endogenous variables affect exogenous variables.","exogenous variables affect endogenous variables."],a:3},
+{q:"Variables that a model tries to explain are called:",o:["endogenous.","exogenous.","market clearing.","fixed."],a:0},
+{q:"Variables that a model takes as given are called:",o:["endogenous.","exogenous.","market clearing.","macroeconomic."],a:1},
+{q:"Macroeconomic models are used to explain how ______ variables influence ______ variables.",o:["endogenous; exogenous","exogenous; endogenous","microeconomic; macroeconomic","macroeconomic; microeconomic"],a:1},
+{q:"Important characteristics of macroeconomic models include all of the following EXCEPT:",o:["simplifying assumptions.","functional relationships based on randomized control trials.","endogenous and exogenous variables.","implicit or explicit consistency with microeconomic foundations."],a:1},
+{q:"In a simple model of the supply and demand for pizza, the endogenous variables are:",o:["the price of pizza and the price of cheese.","aggregate income and the quantity of pizza sold.","aggregate income and the price of cheese.","the price of pizza and the quantity of pizza sold."],a:3},
+{q:"In a simple model of the supply and demand for pizza, when buyers' income increases, the price of pizza ______ and the quantity purchased ______.",o:["increases; decreases","increases; increases","decreases; increases","decreases; decreases"],a:1},
+{q:"In a simple model of the supply and demand for pizza, when the price of cheese increases, the price of pizza ______ and the quantity purchased ______.",o:["increases; increases","decreases; increases","decreases; decreases","increases; decreases"],a:3},
+{q:"Which statement best illustrates the 'art' rather than the 'science' of macroeconomics?",o:["Macroeconomic data provide the motivation for new macroeconomic theory.","Macroeconomic relationships can be expressed using symbols and equations.","Macroeconomists must determine which simplifying assumptions clarify our thinking and which ones mislead us.","Graphs and charts can be used to illustrate the history of macroeconomic variables."],a:2},
+{q:"In the functional form Y = G(K, L), the G( ) function:",o:["is the growth rate of real GDP when the amount of capital and labor in the economy is fixed.","indicates that the variables inside the parentheses are endogenous variables in the model.","is the symbol that stands for government input into the production process.","is the function telling how the variables in the parentheses determine real GDP."],a:3},
+{q:"Which of the following statements about economic models is true?",o:["There is only one correct economic model.","All economic models are based on the same assumptions.","The purpose of economic models is to show how endogenous variables affect exogenous variables.","Economists use different models to address different economic phenomena."],a:3},
+{q:"Macroeconomic models:",o:["assume that all wages and prices are sticky.","assume that all wages and prices are flexible.","make different assumptions to explain different aspects of the macroeconomy.","focus primarily on the optimizing behavior of households and firms."],a:2},
+{q:"The assumption of continuous market clearing means that:",o:["sellers can sell all that they want at the going price.","buyers can buy all that they want at the going price.","in any given month, buyers can buy all that they want and sellers can sell all that they want at the going price.","at any given instant, buyers can buy all that they want and sellers can sell all that they want at the going price."],a:3},
+{q:"All of the following statements about sticky prices are true EXCEPT:",o:["in the short run, some wages and prices are sticky.","the sticky-price model describes the equilibrium toward which the economy slowly gravitates.","for studying year-to-year fluctuations, most macroeconomists believe that price stickiness is a better assumption than is price flexibility.","magazine publishers tend to change their newsstand prices only every three or four years."],a:1},
+{q:"The assumption of flexible prices is a more plausible assumption when applied to price changes that occur:",o:["from minute to minute.","from year to year.","in the long run.","in the short run."],a:2},
+{q:"An assumption of _______ is more plausible for studying the short-run behavior of the economy, while an assumption of ______ is more plausible for studying the long-run, equilibrium behavior of the economy.",o:["deflation; inflation","inflation; deflation","flexible prices; sticky prices","sticky prices; flexible prices"],a:3},
+{q:"When studying the short-run behavior of the economy, an assumption of ______ is more plausible, whereas when studying the long-run equilibrium behavior of an economy, an assumption of ______ is more plausible.",o:["inflation; unemployment","unemployment; inflation","flexible prices; sticky prices","sticky prices; flexible prices"],a:3},
+{q:"Which of the following is the best example of a sticky price?",o:["the price of a barrel of oil","the price of the U.S. dollar in terms of euros","the price of a share of stock","the price of a soda in a vending machine"],a:3},
+{q:"Which of the following is the best example of a flexible price?",o:["the price of a cup of coffee in a coffee shop","the price of gasoline at a service station","the price of a ticket at a movie theater","the price of a book in a bookstore"],a:1},
+{q:"Macroeconomists are like scientists in that they both:",o:["design data and conduct controlled experiments to test their theories.","rely on data analyzed from experiments they set up in a laboratory.","are unlimited in their use of controlled experiments.","collect data, develop hypotheses, and analyze the results."],a:3},
+{q:"Using a market-clearing model to analyze the labor market is ______ because wages usually change ______.",o:["realistic; frequently","realistic; infrequently","unrealistic; frequently","unrealistic; infrequently"],a:3}
+]},
+
+{id:2,title:"Ch.2 国民收入核算",color:"#185FA5",
+questions:[
+{q:"The economic statistic used to measure the level of prices is:",o:["GDP.","CPI.","GNP.","real GDP."],a:1},
+{q:"The statistic economists use to measure the value of economic output is:",o:["the CPI.","GDP.","the GDP deflator.","the unemployment rate."],a:1},
+{q:"GDP is all of the following EXCEPT:",o:["the total expenditure of everyone in the economy.","the total income of everyone in the economy.","the overall expenditure on the economy's output of goods and services.","the total output of the economy."],a:0},
+{q:"The total income of everyone in the economy is exactly equal to the total:",o:["expenditure on the economy's output of goods and services.","consumption expenditures of everyone in the economy.","expenditures of all businesses in the economy.","government expenditures."],a:0},
+{q:"An economy's ______ equals its ______.",o:["consumption; income","consumption; expenditure on goods and services","expenditure on goods; expenditures on services","total income; total expenditure on goods and services"],a:3},
+{q:"Two equivalent ways to view GDP are as the:",o:["total payments made to all workers in the economy or the total profits of all firms and businesses in the economy.","total expenditures on all goods produced in the economy or the total income earned from producing all services in the economy.","total profits of all firms and businesses in the economy or the total consumption of goods and services by all households in the economy.","total income of everyone in the economy or the total expenditure on the economy's output of goods and services."],a:3},
+{q:"In the circular flow model, the flow of dollars from firms to households is paid _____, and the flow of dollars from households to firms is paid _____.",o:["as wages, capital income, and profits; for goods and services","for value added; as imputed values","in current dollars; in constant dollars","as interest and dividends; for depreciation and taxes"],a:0},
+{q:"Which of the following is a flow variable?",o:["wealth","the number unemployed","government debt","income"],a:3},
+{q:"Which of the following is a stock variable?",o:["wealth","consumption","investment","income"],a:0},
+{q:"All of the following are stock variables EXCEPT:",o:["a consumer's wealth.","the government budget deficit.","the number of unemployed people.","the amount of capital in the economy."],a:1},
+{q:"All of the following are flow variables EXCEPT:",o:["the number of new automobile purchases.","the number of people losing their jobs.","business expenditures on plant and equipment.","the government debt."],a:3},
+{q:"The amount of capital in an economy is a(n) ______, and the amount of investment is a(n) ______.",o:["flow; stock","stock; flow","final good; intermediate good","intermediate good; final good"],a:1},
+{q:"The market value of all final goods and services produced within an economy in a given period of time is called:",o:["industrial production.","gross domestic product.","the GDP deflator.","general durable purchases."],a:1},
+{q:"GDP is the market value of all ______ goods and services produced within an economy in a given period of time.",o:["used","intermediate","consumer","final"],a:3},
+{q:"Assume that total output consists of 4 apples and 6 oranges and that apples cost $1 each and oranges cost $0.50 each. In this case, the value of GDP is:",o:["10 pieces of fruit.","$7.","$8.","$10."],a:1},
+{q:"All of the following transactions that took place in 2009 would be included in GDP for 2009 EXCEPT the purchase of a:",o:["book titled The Year 3000 that was printed in 2009.","2001 Jeep Cherokee.","year 2010 calendar printed in 2009.","ticket to see the movie 2001."],a:1},
+{q:"When a firm sells a product out of inventory, GDP:",o:["increases.","decreases.","is not changed.","increases or decreases, depending on the year the product was produced."],a:2},
+{q:"When a firm sells a product out of inventory, investment expenditures ______, and consumption expenditures ______.",o:["increase; decrease","decrease; increase","decrease; remain unchanged","remain unchanged; increase"],a:1},
+{q:"Assume that a bakery hires more workers. GDP increases in all of the following cases EXCEPT when the bread:",o:["is sold to households.","is stored away for later sale.","grows stale and is thrown away.","is sold to other firms."],a:2},
+{q:"When bread is baked but put away for later sale, this is called:",o:["waste.","saving.","fixed investment.","investment in inventory."],a:3},
+{q:"Assume that a rancher sells McDonald's a quarter-pound of meat for $1 and McDonald's sells you a hamburger for $2. In this case, GDP increases by:",o:["$0.50.","$1.","$2.","$3."],a:2},
+{q:"A tire company sells four tires to an automobile company for $400, another company sells a CD player for $500, and the automobile company puts all items in a car that it sells for $20,000. The amount from these transactions that should be counted in GDP is:",o:["$20,000.","$20,000 less the automobile company's profit on the car.","$20,900.","$20,900 less the profits of all three companies."],a:0},
+{q:"The value added of an item produced refers to:",o:["a firm's profits on the item sold.","the value of the labor inputs in the production of an item.","the value of a firm's output less the value of its costs.","the value of a firm's output less the value of the intermediate goods that the firm purchases."],a:3},
+{q:"A firm buys all the parts for an automobile for $10,000, pays workers $10,000 to fabricate it, and sells it for $22,000. The value added by the automobile company is:",o:["$10,000.","$12,000.","$20,000.","$22,000."],a:1},
+{q:"In computing GDP:",o:["expenditures on used goods are included.","production added to inventories is excluded.","the amount of production in the underground economy is imputed.","the value of intermediate goods is included in the market price of the final goods."],a:3},
+{q:"To avoid double counting in the computation of GDP, GDP includes only the value of ______ goods.",o:["final","used","intermediate","investment"],a:0},
+{q:"An example of an imputed value in the GDP is the:",o:["value added of meals cooked at home.","housing services enjoyed by homeowners.","rental services of automobiles to their owners.","value of illegal drugs sold."],a:1},
+{q:"In principle, the GDP accounts should—but do not—have an imputation for:",o:["housing services enjoyed by homeowners.","rental services of automobiles driven by owners.","meals cooked in restaurants.","housing services enjoyed by renters."],a:1},
+{q:"The underground economy:",o:["is included in the latest GDP accounts.","includes only illegal activities.","includes domestic workers for whom Social Security tax is not collected.","excludes the illegal drug trade."],a:2},
+{q:"Nominal GDP means the value of goods and services is measured in ______ prices.",o:["current","real","constant","average"],a:0},
+{q:"Real GDP means the value of goods and services is measured in ______ prices.",o:["current","actual","constant","average"],a:2},
+{q:"Assume that apples cost $0.50 in 2002 and $1 in 2009, whereas oranges cost $1 in 2002 and $1.50 in 2009. If 4 apples were produced in 2002 and 5 in 2009, whereas 3 oranges were produced in 2002 and 4 in 2009, then real GDP (in 2002 prices) in 2009 was:",o:["$5.","$6.50.","$9.50.","$11."],a:1},
+{q:"If nominal GDP in 2009 equals $14 trillion and real GDP in 2009 equals $11 trillion, what is the value of the GDP deflator?",o:["0.79","1.03","1.27","3.2"],a:2},
+{q:"If the GDP deflator in 2009 equals 1.25 and nominal GDP in 2009 equals $15 trillion, what is the value of real GDP in 2009?",o:["$12 trillion","$12.5 trillion","$15 trillion","$18.75 trillion"],a:0},
+{q:"The GDP deflator is equal to:",o:["the ratio of nominal GDP to real GDP.","the ratio of real GDP to nominal GDP.","real GDP minus national GDP.","nominal GDP minus real GDP."],a:0},
+{q:"If nominal GDP grew by 5 percent and real GDP grew by 3 percent, then the GDP deflator grew by approximately ______ percent.",o:["2","3","5","8"],a:0},
+{q:"If nominal GDP increased by 5 percent and the GDP deflator increased by 3 percent, then real GDP ______ by ______ percent.",o:["increased; 2","decreased; 2","increased; 8","decreased; 8"],a:0},
+{q:"Real GDP is a better measure of economic well-being than nominal GDP because real GDP:",o:["excludes the value of goods and services exported abroad.","includes the value of government transfer payments.","measures changes in the quantity of goods and services produced by holding prices constant.","adjusts the value of goods and services produced for changes in the foreign exchange rate."],a:2},
+{q:"Chain-weighted measures of real GDP make use of prices from:",o:["an unchanging base year.","a continuously changing base year.","a base year that is changed approximately every 5 years.","a base year that is changed approximately every 10 years."],a:1},
+{q:"The national income accounts identity for an open economy is:",o:["Y = C + I + G − NX.","Y = C + I + G + NX.","Y = C + I + G.","Y = C + I − G."],a:1},
+{q:"If GDP is $5,465B, consumption is $3,657B, investment is $741B, and government purchases are $1,098B, then net exports are:",o:["$131B.","−$131B.","$31B.","−$31B."],a:3},
+{q:"If GDP is $5,465B, consumption is $3,657B, investment is $741B, and net exports are −$1,910B, then government purchases are:",o:["$2,977B.","$1,910B.","−$843B.","$1,067B."],a:0},
+{q:"If real GDP grew by 6 percent and population grew by 2 percent, then real GDP per person grew by approximately ______ percent.",o:["2","3","4","8"],a:2},
+{q:"In the national income accounts, consumption expenditures include all of the following EXCEPT household purchases of:",o:["durable goods.","nondurable goods.","new residential housing.","services."],a:2},
+{q:"In the national income accounts, the purchases of durables, nondurables, and services by households are classified as:",o:["consumption.","investment.","government purchases.","net exports."],a:0},
+{q:"In the national income accounts, goods bought for future use are classified as which type of expenditure?",o:["services","investment","government purchases","net exports"],a:1},
+{q:"If total investment equals $741B, business fixed investment is $524B, and residential fixed investment is $222B, then inventory investment is:",o:["$5B.","−$5B.","$15B.","−$15B."],a:1},
+{q:"In the national income accounts, all of the following are classified as government purchases EXCEPT:",o:["payments made to Social Security recipients.","services provided by police officers.","purchases of military hardware.","services provided by U.S. senators."],a:0},
+{q:"In the national income accounts, government purchases are goods and services purchased by:",o:["the federal government.","the federal and state governments.","the state and local governments.","the federal, state, and local governments."],a:3},
+{q:"In the national income accounts, net exports equal:",o:["exported goods minus imported goods.","exported goods and services minus imported goods and services.","exported goods minus imported services.","exported goods and services plus imported goods and services."],a:1},
+{q:"If GDP is $5,465B, C + I + G = $5,496B, and exports equal $673B, imports are:",o:["$673B.","−$673B.","$704B.","−$704B."],a:2},
+{q:"All of the following actions are investments in the sense used by macroeconomists EXCEPT:",o:["Apple's building a new factory.","a corner candy store's buying a new computer.","John Smith's buying a newly constructed home.","Sandra Santiago's buying 100 shares of Apple stock."],a:3},
+{q:"In 2013, the GDP of the United States totaled about:",o:["$16.8 billion.","$168 billion.","$16.8 trillion.","$168 trillion."],a:2},
+{q:"GNP equals GDP ______ income earned domestically by foreigners ______ income that nationals earn abroad.",o:["plus; plus","minus; minus","minus; plus","plus; minus"],a:2},
+{q:"Net national product equals GNP:",o:["plus net investment.","minus net investment.","plus depreciation.","minus depreciation."],a:3},
+{q:"National income differs from net national product by an amount called:",o:["depreciation.","indirect business taxes.","statistical discrepancy.","net foreign factor income payments."],a:2},
+{q:"The largest component of national income is:",o:["corporate profits.","compensation of employees.","proprietors' income.","net interest."],a:1},
+{q:"Disposable personal income:",o:["is computed by subtracting personal tax from personal income.","is generally greater than personal income.","includes corporate profits but not dividends.","does not include government transfers to individuals."],a:0},
+{q:"According to the usual seasonal pattern of the U.S. economy, GDP is highest in the quarter that includes:",o:["January, February, and March.","April, May, and June.","July, August, and September.","October, November, and December."],a:3},
+{q:"The CPI is determined by computing:",o:["an average of prices of all goods and services.","the price of a basket of goods and services that changes every year, relative to the same basket in a base year.","the price of a fixed basket of goods and services, relative to the price of the same basket in a base year.","nominal GDP relative to real GDP."],a:2},
+{q:"Prices of items included in the CPI are:",o:["averaged, with the price of every item weighted equally.","weighted according to the amount of the item produced in GDP.","weighted according to the quantity of the item purchased by the typical household.","chained to the base year by the year-to-year growth rate of the item."],a:2},
+{q:"The core inflation rate:",o:["measures the change in producer prices.","is measured using a Paasche index.","excludes food and energy prices.","includes the price of exports and includes the price of imports."],a:2},
+{q:"Measuring the rate of inflation using a market basket that excludes food and energy prices is preferred by some analysts because:",o:["it provides a real, rather than a nominal, rate of inflation.","it gives a better measure of ongoing, sustained price changes.","it is more consistent with measures of inflation used in other countries.","it fluctuates more than measures of inflation that include food and energy prices."],a:1},
+{q:"An increase in the price of goods bought by firms and the government will show up in:",o:["the CPI but not in the GDP deflator.","the GDP deflator but not in the CPI.","both the CPI and the GDP deflator.","neither the CPI nor the GDP deflator."],a:1},
+{q:"An increase in the price of imported goods will show up in:",o:["the CPI but not in the GDP deflator.","the GDP deflator but not in the CPI.","both the CPI and the GDP deflator.","neither the CPI nor the GDP deflator."],a:0},
+{q:"Given: the 2004 basket costs $14,000 in 2004 prices and $21,000 in 2009 prices; the 2009 basket costs $20,000 in 2009 prices. A Laspeyres price index for 2009 using 2004 as base year would be:",o:["1.05.","approximately 1.07.","approximately 1.33.","1.50."],a:3},
+{q:"Given: the 2004 basket costs $14,000 in 2004 prices and $21,000 in 2009 prices; the 2009 basket costs $20,000 in 2009 prices and $15,000 in 2004 prices. A Paasche index for 2009 using 2004 prices would be:",o:["1.05.","approximately 1.07.","approximately 1.33.","1.50."],a:1},
+{q:"The CPI is a:",o:["Laspeyres price index.","Paasche price index.","Laspeyres quantity index.","Paasche quantity index."],a:0},
+{q:"The GDP deflator is a:",o:["Laspeyres price index.","Paasche price index.","Laspeyres quantity index.","Paasche quantity index."],a:1},
+{q:"When prices of different goods are increasing by different amounts, the price index that will rise the fastest is:",o:["the PCE index.","the CPI.","the GDP deflator.","a Paasche index."],a:1},
+{q:"The panel of economists appointed by the Senate Finance Committee estimated that the CPI ______ inflation by approximately ______ percentage point(s) per year.",o:["overestimates; 1","overestimates; 10","underestimates; 1","underestimates; 10"],a:0},
+{q:"According to the BLS definition, a person is NOT in the labor force if that person:",o:["is going to school full time.","is temporarily absent from a job because of illness.","has been temporarily laid off.","is out of a job and was looking for work during the previous four weeks."],a:0},
+{q:"According to the BLS definition, people are considered to be unemployed if they:",o:["are out of a job but not looking for work.","retired from the labor force before age 65.","do not have a job but have looked for work in the past four weeks.","are absent from work because of bad weather or illness."],a:2},
+{q:"The labor force equals the:",o:["adult population.","number of employed individuals.","number of unemployed individuals.","number of employed and unemployed individuals."],a:3},
+{q:"If 7 million workers are unemployed, 143 million workers are employed, and the adult population equals 200 million, then the unemployment rate equals approximately ______ percent.",o:["3.5","4.7","4.9","7"],a:1},
+{q:"The labor-force participation rate is the percentage of the:",o:["adult population that is employed.","adult population that is in the labor force.","labor force that is employed.","labor force that is unemployed."],a:1},
+{q:"If the unemployment rate is 6 percent and the number of employed is 188 million, then the labor force equals ______ million.",o:["11.28","176.72","188","200"],a:3},
+{q:"If an increasing proportion of the adult population is retired, then the labor-force participation rate:",o:["will increase.","will decrease.","will remain constant.","may increase, decrease, or remain constant."],a:1},
+{q:"If the adult population equals 250 million, of which 145 million are employed and 5 million are unemployed, the labor-force participation rate equals ______ percent.",o:["50","58","60","67"],a:2},
+{q:"If the number of employed increases while the number of unemployed does not change, the unemployment rate:",o:["will increase.","will decrease.","will not change.","may either increase or decrease."],a:1},
+{q:"In the United States since the end of World War II:",o:["the labor-force participation rates of both men and women have increased.","the labor-force participation rates of both men and women have decreased.","the labor-force participation rate of men has increased, while the labor-force participation rate of women has decreased.","the labor-force participation rate of men has decreased, while the labor-force participation rate of women has increased."],a:3},
+{q:"The household survey provides estimates of workers ______, while the establishment survey provides estimates of workers ______.",o:["self-employed; unemployed","unemployed; self-employed","with jobs; on firms' payrolls","on firms' payrolls; with jobs"],a:2},
+{q:"The employment statistics computed from the establishment survey do not include:",o:["workers with two jobs.","those who are self-employed.","workers on firms' payrolls.","part-time workers on firms' payrolls."],a:1},
+{q:"A worker with two jobs is counted:",o:["once in both the household and the establishment surveys.","once in the household survey but twice in the establishment survey.","once in the establishment survey but twice in the household survey.","twice in both the household survey and the establishment survey."],a:1},
+{q:"An estimate of the number of unemployed workers in the economy can be obtained from:",o:["both the household survey and the establishment survey.","the household survey but not from the establishment survey.","the establishment survey but not from the household survey.","neither the household survey nor the establishment survey."],a:1},
+{q:"Economists can calculate the U.S. unemployment rate by using:",o:["both the household survey and the establishment survey.","the household survey but not the establishment survey.","the establishment survey but not the household survey.","neither the household survey nor the establishment survey."],a:0},
+{q:"A farmer grows wheat and sells it to a miller for $1; the miller turns the wheat into flour and sells it to a baker for $3; the baker uses the flour to make bread and sells the bread for $6. The value added by the miller is:",o:["$1.","$2.","$3.","$6."],a:1},
+{q:"A woman marries her butler. Before they were married, she paid him $60,000 per year. He continues to wait on her as before (but as a husband rather than as a wage earner). The marriage:",o:["does not change GDP.","decreases GDP by $60,000.","increases GDP by $60,000.","increases GDP by more than $60,000."],a:1},
+{q:"A fixed-weight price index like the CPI ______ the change in the cost of living because it ______ take into account that people can substitute less expensive goods for ones that have become more expensive.",o:["underestimates; does not","overestimates; does","accurately estimates; does","overestimates; does not"],a:3}
+]},
+
+{id:3,title:"Ch.3 国民收入：来源与用途",color:"#854F0B",
+questions:[
+{q:"The circular flow model shows that households use income for:",o:["consumption, saving, and factor payments.","consumption, taxes, and factor payments.","taxes, saving, and factor payments.","consumption, taxes, and saving."],a:3},
+{q:"In the circular flow diagram, firms receive revenue from the _____ market, which is used to purchase inputs in the _____ market.",o:["goods; financial","factor; financial","goods; factor","factor; goods"],a:2},
+{q:"In the circular flow model, households receive income from the _____ market and save through the _____ market.",o:["goods; financial","factor; financial","goods; factor","factor; goods"],a:1},
+{q:"In the long run, the level of national income in an economy is determined by its:",o:["factors of production and production function.","real and nominal interest rate.","government budget surplus or deficit.","rate of economic and accounting profit."],a:0},
+{q:"An economy's factors of production and its production function determine the economy's:",o:["labor-force participation rate.","budget surplus or deficit.","population growth rate.","output of goods and services."],a:3},
+{q:"The two most important factors of production are:",o:["goods and services.","labor and energy.","capital and labor.","saving and investment."],a:2},
+{q:"Unlike the real world, the classical model with fixed output assumes that:",o:["capital and labor are fully utilized.","all capital is fully utilized, but some labor is unemployed.","all labor is fully employed, but some capital lies idle.","some capital lies idle, and some labor is unemployed."],a:0},
+{q:"A production function is a mathematical relationship between:",o:["factor prices and the marginal product of factors.","factors of production and factor prices.","factors of production and the quantity of output produced.","factor prices and the quantity of output produced."],a:2},
+{q:"The production function feature called 'constant returns to scale' means that if we:",o:["multiply capital by z1 and labor by z2, we multiply output by z3.","increase capital and labor by 10 percent each, we increase output by 10 percent.","increase capital and labor by 5 percent each, we increase output by 10 percent.","increase capital by 10 percent and increase labor by 5 percent, we increase output by 7.5 percent."],a:1},
+{q:"If an increase of an equal percentage in all factors of production increases output by the same percentage, then a production function has the property called:",o:["constant marginal product of labor.","increasing marginal product of labor.","constant returns to scale.","increasing returns to scale."],a:2},
+{q:"If bread is produced using a constant returns to scale production function, then if the:",o:["number of workers is doubled, twice as much bread will be produced.","amount of equipment is doubled, twice as much bread will be produced.","amounts of equipment and workers are both doubled, twice as much bread will be produced.","amounts of equipment and workers are both doubled, four times as much bread will be produced."],a:2},
+{q:"The neoclassical theory of distribution:",o:["was developed by Karl Marx.","is rejected by most economists today.","shows that the national income of an economy is not equal to total output.","is a theory of how national income is divided among the factors of production."],a:3},
+{q:"The price received by each factor of production is determined by:",o:["demand for output and supply of factors.","demand for factors and supply of output.","demand and supply of output.","demand and supply of factors."],a:3},
+{q:"The assumption that the factor's supply is fixed will imply that the factor's:",o:["supply curve is horizontal.","supply curve is vertical.","supply curve slopes up to the right.","demand curve slopes up to the right."],a:1},
+{q:"A firm's economic profit is:",o:["the price of output minus the wage minus the rental price of capital.","revenue minus costs.","revenue plus capital costs.","the price of output minus labor costs."],a:1},
+{q:"A competitive firm chooses the:",o:["price at which to sell the product produced.","wage to pay labor.","quantity of labor and capital to employ.","rental price to pay capital."],a:2},
+{q:"The marginal product of labor is:",o:["output divided by labor input.","additional output produced when one additional unit of labor is added.","additional output produced when one additional unit of labor and one additional unit of capital are added.","value of additional output when one dollar's worth of additional labor is added."],a:1},
+{q:"A competitive, profit-maximizing firm hires labor until the:",o:["marginal product of labor equals the wage.","price of output multiplied by the marginal product of labor equals the wage.","real wage equals the real rental price of capital.","wage equals the rental price of capital."],a:1},
+{q:"The real wage is the return to labor measured in:",o:["dollars.","units of output.","units of labor.","units of capital."],a:1},
+{q:"The marginal product of capital is:",o:["output divided by capital input.","additional output produced when one additional unit of capital is added.","additional output produced when one additional unit of capital and one additional unit of labor are added.","the value of additional output when one dollar's worth of additional capital is added."],a:1},
+{q:"The real rental price of capital is the price per unit of capital measured in:",o:["dollars.","units of output.","units of labor.","units of capital."],a:1},
+{q:"The real wage will increase if:",o:["the supply of labor increases.","the productivity of labor increases.","the price of output increases.","the supply of capital decreases."],a:1},
+{q:"An increase in the supply of capital will:",o:["increase the real rental price of capital.","decrease the real rental price of capital.","increase the productivity of capital.","increase the marginal product of capital."],a:1},
+{q:"In the classical model, what adjusts to eliminate any unemployment of labor in the economy?",o:["the average price level","the interest rate","the real rental price of capital","the real wage"],a:3},
+{q:"The neoclassical theory of distribution explains the allocation of:",o:["output between goods and services.","output among consumption, investment, and government spending.","income among factors of production.","income between saving and investment."],a:2},
+{q:"Assuming that all firms maximize profits, economic profit is zero if:",o:["all factors are paid their marginal products and the law of diminishing returns is valid.","all factors are paid their marginal products, and there are constant returns to scale.","no firms are competitive.","all factors are paid their marginal products."],a:1},
+{q:"According to Euler's theorem, if competitive firms pay each factor its marginal product and the production function has constant returns to scale, the sum of all factor payments will equal:",o:["total investment.","total saving.","total profits.","total output."],a:3},
+{q:"Accounting profit is:",o:["economic profit minus the return to capital.","equal to economic profit.","economic profit plus the return to capital.","equal to the economic return to capital."],a:2},
+{q:"According to the neoclassical theory of distribution, if firms are competitive and subject to constant returns to scale, total income in the economy is distributed:",o:["only to the labor used in production.","partly between labor and capital used in production, with the surplus going to the owners of the firm as profits.","equally between the labor and capital used in production.","between the labor and capital used in production, according to their marginal productivities."],a:3},
+{q:"According to the neoclassical theory of distribution, total output is divided between payments to capital and payments to labor depending on their:",o:["supply.","equilibrium growth rates.","relative political power.","marginal productivities."],a:3},
+{q:"What determines the ratio of the wage to rental rate of capital in a competitive, profit-maximizing economy with constant returns to scale?",o:["the quantity of economic profits earned by firm owners","the interest rate","the ratio of public saving to private saving","the marginal productivity of labor relative to the marginal productivity of capital"],a:3},
+{q:"With a Cobb–Douglas production function, the share of output going to labor:",o:["decreases as the amount of labor increases.","increases as the amount of labor increases.","increases as the amount of capital increases.","does not depend on the amount of labor in the economy."],a:3},
+{q:"If output is described by the production function Y = AK^0.2 L^0.8, then the production function has:",o:["constant returns to scale.","diminishing returns to scale.","increasing returns to scale.","a degree of returns to scale that cannot be determined from the information given."],a:0},
+{q:"If Y = AK^0.5 L^0.5 and A, K, and L are all 100, the marginal product of capital is:",o:["50.","100.","200.","1000."],a:0},
+{q:"Since 1960, the U.S. ratio of labor income to total income has:",o:["been about 2.5 to 1.","remained relatively steady.","increased steadily.","decreased steadily."],a:1},
+{q:"If the production function describing an economy is Y = 100K^0.25 L^0.75, then the share of output going to labor:",o:["is 25 percent.","is 75 percent.","depends on the quantities of labor and capital.","depends on the state of technology."],a:1},
+{q:"In a Cobb–Douglas production function, the marginal product of labor will increase if:",o:["the quantity of labor increases.","the quantity of capital increases.","capital's share of output increases.","average labor productivity decreases."],a:1},
+{q:"In a Cobb–Douglas production function, the marginal product of capital will increase if:",o:["the quantity of labor increases.","the quantity of capital increases.","labor's share of output increases.","average capital productivity decreases."],a:0},
+{q:"According to Goldin and Katz, the increasing income inequality of recent decades is the result of:",o:["increases in the rates of skill-biased technological advancement and educational attainment.","decreases in the rates of skill-biased technological advancement and educational attainment.","an increase in the rate of skill-biased technological advancement and a slowdown in educational advancement.","a decrease in the rate of skill-biased technological advancement and an increase in the rate of educational advancement."],a:2},
+{q:"Skill-biased technological change ______ the demand for high-skilled workers. If we also observe a slowdown in educational advancement, we would expect _____ wages for skilled workers.",o:["increases; higher","increases; lower","decreases; higher","decreases; lower"],a:0},
+{q:"For much of the twentieth century, skill-biased technological change increased the demand for high-skilled workers, while educational advancement increased the supply. Because educational advancement _______ skill-biased technological change, we should expect _____ wages for skilled workers.",o:["increased; outpaced; higher","increased; outpaced; lower","decreased; slowed down; higher","decreased; slowed down; lower"],a:1},
+{q:"Estimates by Goldin and Katz indicate that the financial returns of a year of college _____ between 1980 and 2005.",o:["increased","decreased","did not change","were negative"],a:0},
+{q:"According to the neoclassical theory of distribution, in an economy described by a Cobb–Douglas production function, workers should experience high rates of real wage growth when:",o:["real interest rates are high.","real interest rates are low.","labor productivity is growing rapidly.","capital's share of income is growing rapidly."],a:2},
+{q:"Assume that an economy is described by a Cobb–Douglas production function. If average labor productivity is growing rapidly:",o:["labor's share of total income will be increasing.","labor's share of total income will be decreasing.","workers will experience high rates of real wage growth.","economic profits will be positive."],a:2},
+{q:"In a closed economy, the components of GDP are:",o:["consumption, investment, government purchases, and exports.","consumption, investment, government purchases, and net exports.","consumption, investment, and government purchases.","consumption and investment."],a:2},
+{q:"The demand for output in a closed economy is the sum of:",o:["public saving and private saving.","the quantity of capital and labor and production technology.","consumption, investment, and government purchases.","government purchases and transfer payments minus tax receipts."],a:2},
+{q:"Disposable personal income is defined as income after the payment of all:",o:["taxes.","interest.","loans.","social insurance contributions."],a:0},
+{q:"A consumption function shows the relationship between consumption and:",o:["income.","personal income.","disposable income.","taxes."],a:2},
+{q:"Consumption depends ______ on disposable income, and investment depends ______ on the real interest rate.",o:["positively; positively","positively; negatively","negatively; negatively","negatively; positively"],a:1},
+{q:"The marginal propensity to consume is:",o:["expected to be between zero and one.","equal to disposable income divided by consumption.","the amount by which consumption changes when wealth increases by one dollar.","normally assumed to increase as taxes increase."],a:0},
+{q:"If the consumption function is C = 500 + 0.5(Y – T), Y = 6,000, and T = 200 + 0.2Y, then C equals:",o:["2,500.","2,800.","3,500.","4,200."],a:1},
+{q:"If C = 500 + 0.5Y, and Y = 50K^0.5 L^0.5 where K = 100 and L = 100, then C equals:",o:["1,000.","2,500.","3,000.","5,000."],a:2},
+{q:"If C = 150 + 0.85Y and Y increases by 1 unit, then C increases by:",o:["0.15 units.","0.5 units.","0.85 units.","1 unit."],a:2},
+{q:"If C = 150 + 0.85Y and Y increases by 1 unit, then saving:",o:["decreases by 0.85 units.","decreases by 0.15 units.","increases by 0.15 units.","increases by 0.85 units."],a:2},
+{q:"If C = 150 + 0.85(Y – T) and T increases by 1 unit, then saving:",o:["decreases by 0.85 units.","decreases by 0.15 units.","increases by 0.15 units.","increases by 0.85 units."],a:1},
+{q:"If C = 150 + 0.85(Y – T) and T = t0 + t1Y, then if t0 increases by 1 unit, consumption:",o:["decreases by 0.85 units.","decreases by 0.15 units.","increases by 0.15 units.","increases by 0.85 units."],a:0},
+{q:"If C = 150 + 0.85(Y – T), T = t0 + t1Y, and Y = 5,000. If t1 decreases from 0.3 to 0.2, then consumption increases by:",o:["85.","425.","500.","525."],a:1},
+{q:"If C = 200 + 0.7(Y – T), T = 100 + t1Y, and Y = 50K^0.5 L^0.5 where K = 100 and L = 100. If t1 increases from 0.2 to 0.25, then consumption decreases by:",o:["70.","140.","175.","250."],a:2},
+{q:"If C = 200 + 0.7(Y – T), T = 100 + 0.2Y, and Y = 50K^0.5 L^0.5 where K = 100. If L increases from 100 to 144, then consumption increases by:",o:["560.","840.","1,120.","2,120."],a:0},
+{q:"Private investment goods as measured in GDP are purchased by:",o:["business firms alone.","households alone.","business firms and households.","business firms, households, and governments."],a:2},
+{q:"Total investment in the United States averages about ______ percent of GDP.",o:["10","15","20","25"],a:1},
+{q:"Other things equal, an increase in the interest rate leads to:",o:["a decrease in the quantity of investment goods demanded.","no change in the quantity of investment goods demanded.","an increase in the quantity of investment goods demanded.","sometimes an increase and sometimes a decrease in the quantity of investment goods demanded."],a:0},
+{q:"When economists speak of 'the' interest rate, they mean:",o:["the rate on 90-day Treasury bills.","the Fed Funds rate.","the 'prime' rate on mortgage loans.","no particular interest rate; it's usually an innocuous assumption since real interest rates tend to move up and down together."],a:3},
+{q:"A firm wants to build a factory costing $5 million and believes it can get a return of $600,000 in one year. The rate of return on this investment would be:",o:["6 percent.","12 percent.","18 percent.","30 percent."],a:1},
+{q:"A firm is considering building a factory costing $5 million that yields $600,000 profit per year. The interest rate at which the firm can borrow is 15 percent. The firm decides:",o:["not build because the rate of return on the factory is only 6 percent.","not build because the rate of return on the factory is only 12 percent.","build because the rate of return on the factory is 30 percent.","build because the rate of return on the factory is 35 percent."],a:1},
+{q:"The nominal interest rate is the:",o:["rate of interest that investors pay to borrow money.","same as the real interest rate.","rate of inflation minus the real rate of interest.","real rate of interest minus the rate of inflation."],a:0},
+{q:"The real interest rate is the:",o:["rate of interest actually paid by consumers.","rate of interest actually paid by banks.","rate of inflation minus the nominal interest rate.","nominal interest rate minus the rate of inflation."],a:3},
+{q:"If I = 1,000 – 30r, the nominal rate is 10 percent, and the inflation rate is 2 percent, investment will be:",o:["240.","700.","760.","970."],a:2},
+{q:"The investment function slopes ______ because there are ______ investment projects that are profitable as the interest rate decreases.",o:["upward; fewer","upward; more","downward; fewer","downward; more"],a:3},
+{q:"The government purchases component of GDP includes all of the following EXCEPT:",o:["federal spending on goods.","state and local spending on goods.","federal spending on transfer payments.","federal spending on services."],a:2},
+{q:"If government purchases exceed taxes minus transfer payments, then the government budget is:",o:["balanced.","in deficit.","in surplus.","endogenous."],a:1},
+{q:"All of the following actions increase government purchases of goods and services EXCEPT the:",o:["federal government's sending a Social Security check to Betty Jones.","federal government's sending a paycheck to the president of the United States.","federal government's buying a Patriot missile.","city of Boston's buying a library book."],a:0},
+{q:"Government transfer payments:",o:["are included as part of government purchases, G.","can be viewed as negative tax payments, T.","are received as payment for inputs in the factor market.","do not affect the level of public or private saving."],a:1},
+{q:"In examining the impact of fiscal policy, it is assumed that:",o:["consumption, investment, and the interest rate are endogenous variables.","consumption, investment, and the interest rate are exogenous variables.","government purchases, taxes, and interest rates are endogenous variables.","government purchases, taxes, and interest rates are exogenous variables."],a:0},
+{q:"In a classical model with fixed factors of production and flexible prices, consumption spending depends on _____, investment spending depends on _____, and government spending is determined _____.",o:["the interest rate; disposable income; by tax revenue","the real wage; the real rental price of capital; by factor prices","labor's share of output; capital's share of output; by the interest rate","disposable income; the interest rate; exogenously"],a:3},
+{q:"In the classical model with fixed output, the supply and demand for goods and services are balanced by:",o:["government spending.","taxes.","fiscal policy.","the interest rate."],a:3},
+{q:"The demand for the economy's output:",o:["is always equal to the supply, regardless of the interest rate.","may be computed provided that we know disposable income.","is equal to consumption, investment, and government purchases.","is determined by government purchases and taxes."],a:2},
+{q:"In the classical model with fixed income, if the demand for goods and services is less than the supply, the interest rate will:",o:["increase.","decrease.","remain unchanged.","either increase or decrease, depending on whether consumption is greater or less than investment."],a:1},
+{q:"In the classical model with fixed income, if the demand for goods and services is greater than the supply, the interest rate will:",o:["increase.","decrease.","remain unchanged.","either increase or decrease, depending on whether consumption is greater or less than investment."],a:0},
+{q:"In the classical model with fixed income, if the interest rate is too low, then investment is too ______, and the demand for output ______ the supply.",o:["high; exceeds","high; falls short of","low; exceeds","low; falls short of"],a:0},
+{q:"In the classical model with fixed income, if the interest rate is too high, then investment is too ______, and the demand for output ______ the supply.",o:["high; exceeds","high; falls short of","low; exceeds","low; falls short of"],a:3},
+{q:"National saving refers to:",o:["disposable income minus consumption.","taxes minus government spending.","income minus consumption minus government purchases.","income minus investment."],a:2},
+{q:"Public saving:",o:["is always positive.","is the overall level of household wealth held in government bonds.","is decided by the Federal Reserve.","depends on the government's tax collections relative to its expenditures."],a:3},
+{q:"In a closed economy, Y – C – G equals:",o:["national saving.","private saving.","public saving.","financial saving."],a:0},
+{q:"In a closed economy, private saving equals:",o:["Y – C – G.","Y – T – C.","Y – I – C.","Y – T."],a:1},
+{q:"The factor that makes national saving equal investment, in equilibrium, is:",o:["the interest rate.","private saving.","public saving.","fiscal policy."],a:0},
+{q:"Private saving is:",o:["income minus consumption minus government spending.","disposable income minus consumption.","disposable income minus government spending.","taxes minus government spending."],a:1},
+{q:"Public saving is:",o:["income minus consumption minus government spending.","disposable income minus consumption.","disposable income minus government spending.","government revenue minus government spending."],a:3},
+{q:"National saving is:",o:["private saving.","public saving.","private saving plus public saving.","private saving minus public saving."],a:2},
+{q:"If disposable income is 4,000, consumption is 3,500, government purchases is 1,000, and taxes minus transfers are 800, national saving is equal to:",o:["300.","500.","700.","1,000."],a:0},
+{q:"If income is 4,800, consumption is 3,500, government spending is 1,000, and taxes minus transfers are 800, private saving is:",o:["300.","500.","1,000.","1,300."],a:1},
+{q:"If income is 4,800, consumption is 3,500, government purchases is 1,000, and taxes minus transfers are 800, public saving is:",o:["–200.","200.","500.","1,800."],a:0},
+{q:"In equilibrium, total investment equals:",o:["private saving.","public saving.","national saving.","household saving."],a:2},
+{q:"The demand for loanable funds is equivalent to:",o:["national saving.","private saving.","public saving.","investment."],a:3},
+{q:"The supply of loanable funds is equivalent to:",o:["national saving.","private saving.","public saving.","investment."],a:0},
+{q:"The supply and demand for loanable funds determine the:",o:["real wage.","real rental price of capital.","real interest rate.","nominal interest rate."],a:2},
+{q:"If saving exceeds investment demand and consumption is not a function of the interest rate:",o:["the demand for loans exceeds the supply of loans.","the interest rate will fall.","the interest rate will rise.","saving will fall."],a:1},
+{q:"In the classical model with fixed income, if households want to save more than firms want to invest, then:",o:["the interest rate rises.","the interest rate falls.","output increases.","output falls."],a:1},
+{q:"When the demand for loanable funds exceeds the supply of loanable funds, households want to save ______ than firms want to invest, and the interest rate ______.",o:["more; rises","more; falls","less; rises","less; falls"],a:2},
+{q:"If Y = 5,000 and C = 500 + 0.6Y with G = 0, equilibrium investment is:",o:["1,500.","2,000.","2,500.","3,000."],a:1},
+{q:"If Y = 5,000, C = 500 + 0.6(Y – T), T = 1,000, G = 600, equilibrium investment is:",o:["600.","1,100.","1,500.","2,200."],a:1},
+{q:"If Y = 5,000, C = 500 + 0.6Y, I = 2,000 – 100r, G = 0, the equilibrium real interest rate is:",o:["2 percent.","5 percent.","10 percent.","20 percent."],a:1},
+{q:"If Y = 5,000, C = 500 + 0.6(Y – T), T = 600, G = 1,000, I = 2,160 – 100r, the equilibrium real interest rate is:",o:["5 percent.","8 percent.","10 percent.","13 percent."],a:3},
+{q:"According to the model in Chapter 3, when government spending increases without a change in taxes:",o:["consumption increases.","consumption decreases.","investment increases.","investment decreases."],a:3},
+{q:"According to the model in Chapter 3, when taxes decrease without a change in government spending:",o:["consumption and investment both increase.","consumption and investment both decrease.","consumption increases and investment decreases.","consumption decreases and investment increases."],a:2},
+{q:"According to the model in Chapter 3, when government spending increases and taxes increase by an equal amount:",o:["consumption and investment both increase.","consumption and investment both decrease.","consumption increases and investment decreases.","consumption decreases and investment increases."],a:1},
+{q:"According to the model in Chapter 3, when government spending increases but taxes stay the same, interest rates:",o:["increase.","are unchanged.","decrease.","can vary."],a:0},
+{q:"According to the model in Chapter 3, when taxes are increased but government spending is unchanged, interest rates:",o:["increase.","are unchanged.","decrease.","can vary wildly."],a:2},
+{q:"In a closed economy with fixed output, when government spending increases:",o:["private saving decreases.","private saving increases.","public saving decreases.","public saving increases."],a:2},
+{q:"In the neoclassical model with fixed income, if there is a decrease in government spending with no change in taxes, then public saving ______ and private saving ______.",o:["increases; increases","increases; does not change","decreases; increases","decreases; does not change"],a:1},
+{q:"Crowding out occurs when an increase in government spending ______ the interest rate and investment ______.",o:["increases; increases","increases; decreases","decreases; increases","decreases; decreases"],a:1},
+{q:"The reduction in investment brought about by the increase in the interest rate caused by increased government spending is called:",o:["a budget deficit.","fiscal policy.","the identification problem.","crowding out."],a:3},
+{q:"In the classical model with fixed income, an increase in the real interest rate could be the result of:",o:["an increase in government spending.","a decrease in government spending.","a decrease in desired investment.","an increase in taxes."],a:0},
+{q:"In the classical model with fixed income, a decrease in the real interest rate could be the result of:",o:["an increase in government spending.","an increase in desired investment.","an increase in taxes.","a decrease in taxes."],a:2},
+{q:"In the classical model with fixed income, a reduction in the government budget deficit will lead to a:",o:["higher real interest rate.","lower real interest rate.","higher level of output.","lower level of output."],a:1},
+{q:"When government spending increases and taxes are increased by an equal amount, interest rates:",o:["increase.","remain the same.","decrease.","can vary wildly."],a:0},
+{q:"In the neoclassical model with fixed income, if there is a decrease in taxes with no change in government spending, then public saving ______ and private saving ______.",o:["increases; increases","increases; decreases","decreases; increases","decreases; does not change"],a:2},
+{q:"[Exhibit: S-I graph] The economy begins in equilibrium at point E (r1, S1=I1). What will be the new equilibrium if the government CUTS SPENDING?",o:["point A","point B","point C","point D"],a:1},
+{q:"[Exhibit: S-I graph] The economy begins in equilibrium at point E (r1, S1=I1). What will be the new equilibrium if the government CUTS TAXES?",o:["point A","point B","point C","point D"],a:0},
+{q:"[Exhibit: S-I graph] The economy begins in equilibrium at point E (r1, S1=I1). What will be the new equilibrium if the government INCREASES SPENDING?",o:["point A","point B","point C","point D"],a:0},
+{q:"[Exhibit: S-I graph] The economy begins in equilibrium at point E (r1, S1=I1). What will be the new equilibrium if the government RAISES TAXES?",o:["point A","point B","point C","point D"],a:1},
+{q:"Using the model in Chapter 3, when the government lowers taxes on business investment (increasing investment demand), the quantity of investment:",o:["increases and the interest rate rises.","is unchanged and the interest rate rises.","and the interest rate are both unchanged.","decreases and the interest rate rises."],a:1},
+{q:"When there is a fixed supply of loanable funds, an increase in investment demand results in:",o:["a higher interest rate.","a lower interest rate.","an increase in investment.","a decrease in investment."],a:0},
+{q:"When saving increases as the interest rate increases, an increase in investment demand results in a ______ interest rate and ______ in the quantity of investment.",o:["higher; no change","higher; an increase","lower; no change","lower; an increase"],a:1},
+{q:"If Y = 5,000, C = 500 + 0.5(Y – T), I = 2,000 – 100r, G = T = 1,000, and a technological innovation changes I = 3,000 – 100r:",o:["I rises by 1,000 and r rises by 10 percentage points.","I rises by 1,000 and r is unchanged.","I is unchanged and r rises by 10 percentage points.","I is unchanged and r rises by 15 percentage points."],a:2},
+{q:"[Exhibit: S-I graph 2] If a technological innovation INCREASES the demand for investment goods, what is the new equilibrium?",o:["point A","point B","point C","point D"],a:1},
+{q:"[Exhibit: S-I graph 2] If a tax law change DECREASES the demand for investment goods, what is the new equilibrium?",o:["point A","point B","point C","point D"],a:0},
+{q:"If increased immigration raises the labor force, the neoclassical theory predicts that:",o:["the real wage will rise, and the real rental price of capital will fall.","both the real wage and the real rental price of capital will fall.","both the real wage and the real rental price of capital will rise.","the real wage will fall, and the real rental price of capital will rise."],a:3},
+{q:"If an earthquake destroys some of the capital stock, the neoclassical theory predicts that:",o:["the real wage will rise, and the real rental price of capital will fall.","both the real wage and the real rental price of capital will fall.","both the real wage and the real rental price of capital will rise.","the real wage will fall, and the real rental price of capital will rise."],a:3},
+{q:"If a technological advancement increases productivity, the neoclassical theory predicts that:",o:["the real wage will rise, and the real rental price of capital will fall.","both the real wage and the real rental price of capital will fall.","both the real wage and the real rental price of capital will rise.","the real wage will fall, and the real rental price of capital will rise."],a:2},
+{q:"An example of decreasing returns to scale is when capital and labor inputs:",o:["both increase 10 percent and output increases 5 percent.","both increase 10 percent and output increases 10 percent.","both increase 5 percent and output increases 10 percent.","do not change and output increases 5 percent."],a:0},
+{q:"An example of increasing returns to scale is when capital and labor inputs:",o:["both increase 10 percent and output increases 5 percent.","both increase 10 percent and output increases 10 percent.","both increase 5 percent and output increases 10 percent.","do not change and output decreases 5 percent."],a:2},
+{q:"If the productivity of farmers has risen substantially due to technological progress, and workers can move freely between being farmers and barbers, then the real wages of:",o:["both barbers and farmers should have remained constant over time.","both barbers and farmers should have risen over time.","farmers should have risen while the real wage of barbers should have remained constant.","barbers should have risen while the real wage of farmers should have remained constant."],a:1},
+{q:"The government raises lump-sum taxes on income by $100 billion, MPC = 0.6. Private saving:",o:["rises by $40 billion.","rises by $60 billion.","falls by $60 billion.","falls by $40 billion."],a:3},
+{q:"The government raises lump-sum taxes on income by $100 billion, MPC = 0.6. Public saving:",o:["rises by $100 billion.","rises by $60 billion.","falls by $60 billion.","falls by $100 billion."],a:0},
+{q:"The government raises lump-sum taxes on income by $100 billion, MPC = 0.6. National saving:",o:["rises by $100 billion.","rises by $60 billion.","falls by $60 billion.","falls by $100 billion."],a:1},
+{q:"The government raises lump-sum taxes on income by $100 billion, MPC = 0.6. Investment:",o:["rises by $100 billion.","rises by $60 billion.","falls by $60 billion.","falls by $100 billion."],a:1},
+{q:"An increase in consumer confidence raises the amount consumers want to consume today for any given level of disposable income. This shift, in a neoclassical economy, will:",o:["lower investment and raise the interest rate.","raise investment and lower the interest rate.","lower both investment and the interest rate.","raise both investment and the interest rate."],a:0},
+{q:"In a neoclassical economy, assume that the government lowers both government spending and taxes by the same amount. This causes:",o:["investment to fall and the interest rate to rise.","investment to rise and the interest rate to fall.","investment and the interest rate to both fall.","investment and the interest rate to both rise."],a:1},
+{q:"In a neoclassical economy, assume that the government lowers both government spending and taxes by $100 billion. If MPC = 0.6, investment will:",o:["rise by $100 billion.","rise by $60 billion.","rise by $40 billion.","not change."],a:2},
+{q:"In a neoclassical economy, if consumption increases as the interest rate decreases, then a $10 billion rise in government spending would:",o:["still crowd out exactly $10 billion of investment.","crowd out between zero and $10 billion of investment.","not crowd out any investment.","crowd out more than $10 billion of investment."],a:1},
+{q:"If the production function is Cobb–Douglas with parameter a = 0.3, capital and labor receive shares of income:",o:["0.3 and 0.3.","0.7 and 0.7.","0.3 and 0.7.","0.7 and 0.3."],a:2},
+{q:"If the production function is Cobb–Douglas with parameter a = 0.3, and the labor force increases by 10 percent, then output:",o:["increases by about 10 percent.","increases by about 7 percent.","increases by about 3 percent.","does not increase since the new workers are unemployed."],a:1}
+]},
+
+{id:4,title:"Ch.4 货币系统",color:"#534AB7",
+questions:[
+{q:"Economists use the term money to refer to:",o:["income.","profits.","assets used for transactions.","earnings from labor."],a:2},
+{q:"Macroeconomists call assets used to make transactions:",o:["real income.","nominal income.","money.","consumption."],a:2},
+{q:"All of the following are considered major functions of money EXCEPT as a:",o:["medium of exchange.","way to display wealth.","unit of account.","store of value."],a:1},
+{q:"People use money as a store of value when they:",o:["hold money to transfer purchasing power into the future.","use money as a measure of economic transactions.","use money to buy goods and services.","hold money to gain power and esteem."],a:0},
+{q:"People use money as a unit of account when they:",o:["hold money to transfer purchasing power into the future.","use money as a measure of economic transactions.","use money to buy goods and services.","hold money to gain power and esteem."],a:1},
+{q:"People use money as a medium of exchange when they:",o:["hold money to transfer purchasing power into the future.","use money as a measure of economic transactions.","use money to buy goods and services.","hold money to gain power and esteem."],a:2},
+{q:"When a pizza maker lists the price of a pizza as $10, this is an example of using money as a:",o:["store of value.","unit of account.","medium of exchange.","flow of value."],a:1},
+{q:"Money's liquidity refers to the ease with which:",o:["coins can be melted down.","illegally obtained money can be laundered.","loans can be floated.","money can be converted into goods and services."],a:3},
+{q:"A trade in a barter economy requires:",o:["currency.","a check.","scrip.","a double coincidence of wants."],a:3},
+{q:"A country that is on a gold standard uses:",o:["commodity money.","fiat money.","credit money.","the barter system."],a:0},
+{q:"An important factor in the evolution of commodity money to fiat money is:",o:["a desire to reduce transaction costs.","a desire to increase transaction costs.","the fact that gold is no longer highly valued.","a desire to use gold for jewelry."],a:0},
+{q:"In a country on a gold standard, the quantity of money is determined by the:",o:["government.","central bank.","amount of gold.","buying and selling of government securities."],a:2},
+{q:"The central bank in the United States is the:",o:["Bank of America.","U.S. Treasury.","U.S. National Bank.","Federal Reserve."],a:3},
+{q:"In the United States, monetary policy is conducted by:",o:["the president.","the Congress.","the Federal Reserve.","the Treasury Department."],a:2},
+{q:"To increase the money supply, the Federal Reserve:",o:["buys government bonds.","sells government bonds.","buys corporate stocks.","sells corporate stocks."],a:0},
+{q:"To reduce the money supply, the Federal Reserve:",o:["buys government bonds.","sells government bonds.","creates demand deposits.","destroys demand deposits."],a:1},
+{q:"Open-market operations are:",o:["Commerce Department efforts to open foreign markets to international trade.","Federal Reserve purchases and sales of government bonds.","Securities and Exchange Commission rules requiring open disclosure of market trades.","Treasury Department purchases and sales of the U.S. gold stock."],a:1},
+{q:"Currency equals:",o:["M1.","the sum of funds in checking accounts.","the sum of checking accounts and paper money.","the sum of coins and paper money."],a:3},
+{q:"Demand deposits are funds held in:",o:["currency.","certificates of deposit.","checking accounts.","money markets."],a:2},
+{q:"All of the following assets are included in M1 EXCEPT:",o:["currency.","demand deposits.","traveler's checks.","money market deposit accounts."],a:3},
+{q:"Money market mutual fund shares are included in:",o:["M1 only.","M2 only.","both M1 and M2.","neither M1 nor M2."],a:1},
+{q:"Credit card balances are included in:",o:["M1 only.","M2 only.","both M1 and M2.","neither M1 nor M2."],a:3},
+{q:"Checking account balances that are linked to debit cards are included in:",o:["M1.","M2 only.","both M1 and M2.","neither M1 nor M2."],a:2},
+{q:"Payment is deferred by using _______, but immediate access to funds occurs when using ______.",o:["currency; demand deposits","credit cards; debit cards","demand deposits; savings deposits","debit cards; credit cards"],a:1},
+{q:"In the United States, the money supply is determined:",o:["only by the Fed.","only by the behavior of individuals who hold money and of banks in which money is held.","jointly by the Fed and by the behavior of individuals who hold money and of banks in which money is held.","according to a constant-growth-rate rule."],a:2},
+{q:"The money supply consists of:",o:["currency plus reserves.","currency plus the monetary base.","currency plus demand deposits.","the monetary base plus demand deposits."],a:2},
+{q:"Bank reserves equal:",o:["gold kept in bank vaults.","gold kept at the central bank.","currency plus demand deposits.","deposits that banks have received but have not lent out."],a:3},
+{q:"In the United States, bank reserves consist of:",o:["currency and demand deposits.","vault cash and deposits at the Federal Reserve.","gold deposits at the Federal Reserve.","the money supply."],a:1},
+{q:"Assets of banks include:",o:["money market mutual funds.","currency in the hands of the public.","loans to customers.","demand deposits."],a:2},
+{q:"Liabilities of banks include:",o:["reserves.","currency in the hands of the public.","loans to customers.","demand deposits."],a:3},
+{q:"In a system with 100-percent-reserve banking:",o:["all banks must hold reserves equal to 100 percent of their loans.","no banks can make loans using deposits made at their institutions.","the banking system completely controls the size of the money supply.","no banks can accept deposits."],a:1},
+{q:"In a 100-percent-reserve banking system, if a customer deposits $100 of currency, the money supply:",o:["increases by $100.","decreases by $100.","increases by more than $100.","remains the same."],a:3},
+{q:"In a 100-percent-reserve banking system, banks:",o:["can increase the money supply.","can decrease the money supply.","can either increase or decrease the money supply.","cannot affect the money supply."],a:3},
+{q:"In a system with fractional-reserve banking:",o:["all banks must hold reserves equal to a fraction of their loans.","no banks can make loans.","the banking system completely controls the size of the money supply.","all banks must hold reserves equal to a fraction of their deposits."],a:3},
+{q:"Banks create money in:",o:["a 100-percent-reserve banking system but not in a fractional-reserve banking system.","a fractional-reserve banking system but not in a 100-percent-reserve banking system.","both a 100-percent-reserve banking system and a fractional-reserve banking system.","neither a 100-percent-reserve banking system nor a fractional-reserve banking system."],a:1},
+{q:"In a fractional-reserve banking system, banks create money when they:",o:["accept deposits.","make loans.","hold reserves.","exchange currency for deposits."],a:1},
+{q:"In a fractional-reserve banking system, banks create money because:",o:["each dollar of reserves generates many dollars of demand deposits.","banks have the legal authority to issue new currency.","funds are transferred from households wishing to save to firms wishing to borrow.","the wealth of the economy expands when borrowers undertake new debt obligations."],a:0},
+{q:"Financial intermediation is the process of:",o:["settling disputes between borrowers and lenders.","advising corporations how to invest.","transferring funds from savers to borrowers.","converting from a barter economy to a money economy."],a:2},
+{q:"The value of a bank's owners' equity is called bank:",o:["deposits.","reserves.","capital.","liquidity."],a:2},
+{q:"A bank balance sheet consists of: Deposits $1,000; Reserves $100; Securities $400; Bonds Issued $500; Loans $2,000. What is the value of bank capital?",o:["–$1,000","$500","$1,000","$1,500"],a:2},
+{q:"The minimum amount of owners' equity in a bank mandated by regulators is called a _____ requirement.",o:["reserve","margin","liquidity","capital"],a:3},
+{q:"The use of borrowed funds to supplement existing funds for purposes of investment is called:",o:["arbitrage.","leverage.","convergence.","intermediation."],a:1},
+{q:"[Bank table Q] Based on the bank balance sheet, what is the leverage ratio at the bank?",o:["3","4.67","5","10"],a:2},
+{q:"[Bank table Q] Based on the bank balance sheet, what is the reserve–deposit ratio at the bank?",o:["3 percent","5 percent","10 percent","15 percent"],a:2},
+{q:"[Bank table Q] Owners' equity will fall to zero if loan defaults reduce the value of total assets by _____ percent.",o:["10","20","30","40"],a:1},
+{q:"The amount of capital that banks are required to hold depends on the:",o:["amount of deposits held at a bank.","riskiness of the bank's assets.","reserve requirements for deposits set by the Fed.","level of deposit insurance coverage."],a:1},
+{q:"The size of the monetary base is determined by:",o:["the Federal Reserve.","the Federal Reserve and banks.","preferences of households about the form of money they wish to hold.","business policies of banks and the laws regulating banks."],a:0},
+{q:"If currency = $100B, reserves = $50B, and bank deposits = $500B, then the monetary base equals:",o:["$50 billion.","$100 billion.","$150 billion.","$600 billion."],a:2},
+{q:"If currency = $100B, reserves = $50B, and bank deposits = $500B, then the money supply equals:",o:["$100 billion.","$150 billion.","$600 billion.","$650 billion."],a:2},
+{q:"The reserve–deposit ratio is determined by:",o:["the Federal Reserve.","business policies of banks and the laws regulating banks.","preferences of households about the form of money they wish to hold.","the Federal Deposit Insurance Corporation (FDIC)."],a:1},
+{q:"The currency–deposit ratio is determined by:",o:["the Federal Reserve.","business policies of banks and the laws regulating banks.","preferences of households about the form of money they wish to hold.","the Federal Deposit Insurance Corporation (FDIC)."],a:2},
+{q:"The preferences of households determine the:",o:["reserve–deposit ratio.","currency–deposit ratio.","size of the monetary base.","loan–deposit ratio."],a:1},
+{q:"If the monetary base is B, rr is the ratio of reserves to deposits, and cr is the ratio of currency to deposits, then the money supply equals ______ multiplied by B.",o:["(rr + 1)/ (rr + cr)","(cr + 1)/ (cr + rr)","(rr + cr)/ (rr + 1)","(rr + cr)/ (cr + 1)"],a:1},
+{q:"The ratio of the money supply to the monetary base is called:",o:["the currency–deposit ratio.","the reserve–deposit ratio.","high-powered money.","the money multiplier."],a:3},
+{q:"High-powered money is another name for:",o:["currency.","demand deposits.","the monetary base.","M2."],a:2},
+{q:"If the ratio of reserves to deposits (rr) increases, while cr is constant and the monetary base is constant, then:",o:["it cannot be determined whether the money supply increases or decreases.","the money supply increases.","the money supply decreases.","the money supply does not change."],a:2},
+{q:"The money supply will increase if the:",o:["currency–deposit ratio increases.","reserve–deposit ratio increases.","monetary base increases.","discount rate increases."],a:2},
+{q:"The money supply will decrease if the:",o:["monetary base increases.","currency–deposit ratio increases.","discount rate decreases.","reserve–deposit ratio decreases."],a:1},
+{q:"If the reserve–deposit ratio is less than one, and the monetary base increases by $1 million, then the money supply will:",o:["increase by $1 million.","decrease by $1 million.","increase by more than $1 million.","decrease by more than $1 million."],a:2},
+{q:"If cr = 0.5 and rr = 0.1, then the money multiplier equals:",o:["0.6.","1.67.","2.0.","2.5."],a:3},
+{q:"If the monetary base equals $400 billion and the money multiplier equals 2, then the money supply equals:",o:["$200 billion.","$400 billion.","$800 billion.","$1,000 billion."],a:2},
+{q:"When the Fed makes an open-market sale, it:",o:["increases the money multiplier (m).","increases the currency–deposit ratio (cr).","increases the monetary base (B).","decreases the monetary base (B)."],a:3},
+{q:"If the Federal Reserve conducted open-market purchases, you should expect ______ to increase.",o:["reserve requirements","the discount rate","the money supply","the reserve–deposit ratio"],a:2},
+{q:"When the Federal Reserve conducts an open-market purchase, it buys bonds from the:",o:["public.","U.S. Treasury.","Internal Revenue Service.","International Monetary Fund."],a:0},
+{q:"For borrowing from the discount window, the Fed sets the _____ of borrowing; for borrowing using the Term Auction Facility, the Fed sets the _____ of borrowing.",o:["maximum quantity; minimum quantity","minimum price; maximum price","quantity; price","price; quantity"],a:3},
+{q:"When banks borrow through the Term Auction Facility, the price of borrowing is determined by:",o:["the Federal Reserve.","a competitive bidding process.","the difference between the discount rate and the interest rate on three-month Treasury securities.","open-market operations."],a:1},
+{q:"The more funds that the Federal Reserve makes available through the Term Auction Facility, the _____ the monetary base and the _____ the money supply.",o:["smaller; smaller","smaller; greater","greater; greater","greater; smaller"],a:2},
+{q:"Two ways for banks to borrow reserves from the Federal Reserve are through:",o:["the discount window and the Term Auction Facility.","open-market operations and excess reserve swaps.","decreasing the reserve–deposit ratio and decreasing the currency–deposit ratio.","fractional-reserve banking and financial intermediation."],a:0},
+{q:"When the Fed decreases the interest rate paid on reserves, it:",o:["increases the reserve–deposit ratio (rr).","decreases the reserve–deposit ratio (rr).","increases the monetary base (B).","decreases the monetary base (B)."],a:1},
+{q:"When the Fed increases the discount rate, it:",o:["increases the reserve to deposit ratio (rr).","decreases the reserve to deposit ratio (rr).","is likely to increase the monetary base (B).","is likely to decrease the monetary base (B)."],a:3},
+{q:"When the Fed increases the interest rate paid on reserves, it:",o:["increases the reserve–deposit ratio (rr).","decreases the reserve–deposit ratio (rr).","increases the monetary base (B).","decreases the monetary base (B)."],a:0},
+{q:"If the Federal Reserve wishes to increase the money supply, it should:",o:["decrease the discount rate.","increase interest paid on reserves.","sell government bonds.","decrease the monetary base."],a:0},
+{q:"The most frequently used tool of monetary policy is:",o:["open-market operations.","changes in the discount rate.","changes in reserve requirements.","changes in interest rate paid on reserves."],a:0},
+{q:"To increase the monetary base, the Fed can:",o:["conduct open-market purchases.","conduct open-market sales.","raise the interest rate paid on reserves.","lower the required reserve ratio."],a:0},
+{q:"To increase the money multiplier, the Fed can:",o:["conduct open-market purchases.","conduct open-market sales.","raise the interest rate paid on reserves.","lower the interest rate paid on reserves."],a:3},
+{q:"If the Federal Reserve increases the interest rate paid on reserves, banks will tend to hold _____ excess reserves, which will _____ the money multiplier.",o:["more; increase","more; decrease","fewer; increase","fewer; decrease"],a:1},
+{q:"Open-market operations change the ______; changes in interest rate paid on reserves change the ______; and changes in the discount rate change the ______.",o:["monetary base; monetary base; monetary base","money multiplier; money multiplier; money multiplier","monetary base; money multiplier; monetary base","money multiplier; monetary base; money multiplier"],a:2},
+{q:"Excess reserves are reserves that banks keep:",o:["in their vaults.","at the central bank.","to meet legal reserve requirements.","above the legally required amount."],a:3},
+{q:"Compared to typical open-market operations, quantitative easing operations (2007–2011) tended to involve _____ securities.",o:["safer and shorter-term","tax-favored and foreign","smaller-denomination and higher-grade","riskier and longer-term"],a:3},
+{q:"The quantitative easing operations (2007–2011) resulted in _____ increases in the monetary base and _____ increases in money supply.",o:["no; no","large; larger","large; smaller","small; smaller"],a:2},
+{q:"The quantitative easing policy (2007–2011) resulted in a large increase in the monetary base that was partially offset by:",o:["a significant increase in the reserve–deposit ratio.","a significant decrease in the reserve–deposit ratio.","open-market purchases.","open-market sales."],a:0},
+{q:"Between August 1929 and March 1933, the money supply fell 28 percent. At that time the monetary base ______, and the currency–deposit and reserve–deposit ratios both ______.",o:["fell; fell","fell; rose","rose; fell","rose; rose"],a:3},
+{q:"If many banks fail, this is likely to:",o:["increase the ratio of currency to deposits.","decrease the ratio of currency to deposits.","have no effect on the ratio of currency to deposits.","decrease the amount of currency in circulation if the Fed takes no action."],a:0},
+{q:"Based on historical observations, if many banks fail, this is likely to:",o:["cause surviving banks to lower their ratios of reserves to deposits.","cause surviving banks to raise their ratios of reserves to deposits.","have no effect on the ratio of reserves to deposits in surviving banks.","cause surviving banks to hold less currency."],a:1},
+{q:"In 1932, the U.S. government imposed a 2-cent tax on checks written on deposits in bank accounts. This would be expected to ______ the currency–deposit ratio and ______ the money supply.",o:["increase; increase","increase; decrease","decrease; increase","decrease; decrease"],a:1}
+]},
+
+{id:5,title:"Ch.5 通货膨胀",color:"#993C1D",
+questions:[
+{q:"The rate of inflation is the:",o:["median level of prices.","average level of prices.","percentage change in the level of prices.","measure of the overall level of prices."],a:2},
+{q:"The definition of the transactions velocity of money is:",o:["money multiplied by prices divided by transactions.","transactions divided by prices multiplied by money.","money divided by prices multiplied by transactions.","prices multiplied by transactions divided by money."],a:3},
+{q:"If there are 100 transactions in a year, the average value of each transaction is $10, and there is $200 of money, transactions velocity is ______ times per year.",o:["0.2","2","5","10"],a:2},
+{q:"If the transactions velocity of money remains constant while the quantity of money doubles, the:",o:["price of the average transaction must double.","number of transactions must remain constant.","price of the average transaction multiplied by the number of transactions must remain constant.","price of the average transaction multiplied by the number of transactions must double."],a:3},
+{q:"Real money balances equal the:",o:["sum of coin, currency, and balances in checking accounts.","amount of money expressed in terms of the quantity of goods and services it can purchase.","number of dollars used as a medium of exchange.","quantity of money created by the Federal Reserve."],a:1},
+{q:"If the average price of goods and services equals $10 and the quantity of money equals $200,000, then real balances equal:",o:["10.","20,000.","200,000.","2,000,000."],a:1},
+{q:"The demand for real money balances is generally assumed to:",o:["be exogenous.","be constant.","increase as real income increases.","decrease as real income increases."],a:2},
+{q:"If the quantity of real money balances is kY, where k is a constant, then velocity is:",o:["k.","1/k.","kP.","P/k."],a:1},
+{q:"If the demand for real money balances is proportional to real income, velocity will:",o:["increase as income increases.","increase as income decreases.","vary directly with the interest rate.","be constant."],a:3},
+{q:"Given M/P = kY, when the demand for money parameter k is large, the velocity of money is ______, and money is changing hands ______.",o:["large; frequently","large; infrequently","small; frequently","small; infrequently"],a:3},
+{q:"Consider M/P = kY. If the money supply is growing at 10 percent and real output is growing at 3 percent, and k is constant, what is the average inflation rate?",o:["3 percent","7 percent","10 percent","13 percent"],a:1},
+{q:"When people want to hold _____ money, the income velocity of money increases, and the money demand parameter k ______.",o:["more; increases","less; increases","more; decreases","less; decreases"],a:3},
+{q:"The quantity theory of money assumes that:",o:["income is constant.","velocity is constant.","prices are constant.","the money supply is constant."],a:1},
+{q:"If income velocity is assumed to be constant, but no other assumptions are made, the level of ______ is determined by M.",o:["prices","real GDP","transactions","nominal GDP"],a:3},
+{q:"If velocity is constant and the factors of production and the production function determine real GDP, then:",o:["the price level is proportional to the money supply.","real GDP is proportional to the money supply.","the price level is fixed.","nominal GDP is fixed."],a:0},
+{q:"In the long run, according to the quantity theory and classical macroeconomic theory, if velocity is constant, then ______ determines real GDP and ______ determines nominal GDP.",o:["the productive capability of the economy; the money supply","the money supply; the productive capability of the economy","velocity; the money supply","the money supply; velocity"],a:0},
+{q:"According to the quantity theory of money, ultimate control over the rate of inflation in the United States is exercised by:",o:["OPEC.","the U.S. Treasury.","the Federal Reserve.","private citizens."],a:2},
+{q:"According to the quantity theory, if money is growing at 10 percent, real output at 3 percent, but velocity is growing at increasingly faster rates due to financial innovation, the rate of inflation must be:",o:["increasing.","decreasing.","7 percent.","constant."],a:0},
+{q:"If the money supply increases 12 percent, velocity decreases 4 percent, and the price level increases 5 percent, then the change in real GDP must be ______ percent.",o:["3","4","9","11"],a:0},
+{q:"Percentage change in P is approximately equal to the percentage change in:",o:["M.","M minus the percentage change in Y.","M minus the percentage change in Y plus the percentage change in velocity.","M minus the percentage change in Y minus the percentage change in velocity."],a:2},
+{q:"Friedman and Schwartz found that decades of high money growth tended to have ______ rates of inflation and decades of low money growth tended to have ______ rates of inflation.",o:["high; high","high; low","low; low","low; high"],a:1},
+{q:"The right of seigniorage is the right to:",o:["levy taxes on the public.","borrow money from the public.","draft citizens into the armed forces.","print money."],a:3},
+{q:"'Inflation tax' means that:",o:["as the price level rises, taxpayers are pushed into higher tax brackets.","as the price level rises, the real value of money held by the public decreases.","as taxes increase, the rate of inflation also increases.","in a hyperinflation, the chief source of tax revenue is often the printing of money."],a:1},
+{q:"The inflation tax is paid:",o:["only by the central bank.","by all holders of money.","only by government bond holders.","equally by every household."],a:1},
+{q:"The real interest rate is equal to the:",o:["amount of interest that a lender actually receives when making a loan.","nominal interest rate plus the inflation rate.","nominal interest rate minus the inflation rate.","nominal interest rate."],a:2},
+{q:"If the nominal interest rate is 1 percent and the inflation rate is 5 percent, the real interest rate is:",o:["1 percent.","6 percent.","–4 percent.","–5 percent."],a:2},
+{q:"If the real interest rate declines by 1 percent and the inflation rate increases by 2 percent, the nominal interest rate implied by the Fisher equation:",o:["increases by 2 percent.","increases by 1 percent.","remains constant.","decreases by 1 percent."],a:1},
+{q:"If the real interest rate and real national income are constant, a 1 percent increase in money growth will lead to rises in:",o:["inflation of 1 percent and the nominal interest rate of less than 1 percent.","inflation of 1 percent and the nominal interest rate of 1 percent.","inflation of 1 percent and the nominal interest rate of more than 1 percent.","both inflation and the nominal interest rate of less than 1 percent."],a:1},
+{q:"According to the quantity theory and the Fisher equation, a 5 percent increase in money growth increases inflation by ___ percent and the nominal interest rate by ____ percent.",o:["1; 5","5; 1","1; 1","5; 5"],a:3},
+{q:"According to the quantity theory and the Fisher equation, if money growth increases by 3 percent and the real interest rate equals 2 percent, then the nominal interest rate will increase:",o:["2 percent.","3 percent.","5 percent.","6 percent."],a:1},
+{q:"In the classical model, according to the quantity theory and the Fisher equation, an increase in money growth increases:",o:["output.","velocity.","the nominal interest rate.","the real interest rate."],a:2},
+{q:"Evidence from the past 40 years in the United States supports the Fisher effect and shows that when the inflation rate is high, the ______ interest rate tends to be ______.",o:["nominal; high","nominal; low","real; high","real; low"],a:0},
+{q:"The ex ante real interest rate is equal to the nominal interest rate:",o:["minus the inflation rate.","plus the inflation rate.","minus the expected inflation rate.","plus the expected inflation rate."],a:2},
+{q:"When a person purchases a 90-day Treasury bill, he or she cannot know the:",o:["ex post real interest rate.","ex ante real interest rate.","nominal interest rate.","expected rate of inflation."],a:0},
+{q:"Equilibrium in the market for goods and services determines the ______ interest rate, and the expected rate of inflation determines the ______ interest rate.",o:["ex ante real; ex ante nominal","ex post real; ex post nominal","ex ante nominal; ex post real","ex post nominal; ex post real"],a:0},
+{q:"The ex ante real interest rate is based on _____ inflation, while the ex post real interest rate is based on _____ inflation.",o:["expected; actual","core; actual","actual; expected","expected; core"],a:0},
+{q:"The ex post real interest rate will be greater than the ex ante real interest rate when the:",o:["rate of inflation is increasing.","rate of inflation is decreasing.","actual rate of inflation is greater than the expected rate of inflation.","actual rate of inflation is less than the expected rate of inflation."],a:3},
+{q:"The opportunity cost of holding money is the:",o:["nominal interest rate.","real interest rate.","federal funds rate.","prevailing Treasury bill rate."],a:0},
+{q:"The real return on holding money is:",o:["the real interest rate.","minus the real interest rate.","the inflation rate.","minus the inflation rate."],a:3},
+{q:"If the real return on government bonds is 3 percent and the expected rate of inflation is 4 percent, then the cost of holding money is ______ percent.",o:["1","3","4","7"],a:3},
+{q:"In its most general formulation, the demand function for real balances depends on the level of income and the:",o:["real interest rate.","nominal interest rate.","rate of inflation.","price level."],a:1},
+{q:"If the nominal interest rate increases, then:",o:["the money supply increases.","the money supply decreases.","the demand for money increases.","the demand for money decreases."],a:3},
+{q:"Consider (M/P)^d = Y/(4i). What is the average velocity of money in this economy?",o:["i","4","1/(4i)","0.25"],a:1},
+{q:"If the Fed announces it will raise the money supply in the future but does not change the money supply today:",o:["both the nominal interest rate and the current price level will decrease.","the nominal interest rate will increase and the current price level will decrease.","the nominal interest rate will decrease and the current price level will increase.","both the nominal interest rate and the current price level will increase."],a:3},
+{q:"If the money supply is held constant, then an increase in the nominal interest rate will ______ the demand for money and ______ the price level.",o:["increase; increase","increase; decrease","decrease; increase","decrease; decrease"],a:2},
+{q:"If the demand for money depends on the nominal interest rate, then via the quantity theory and the Fisher equation, the price level depends on:",o:["only the current money supply.","only the expected future money supply.","both the current and expected future money supply.","neither the current nor the expected future money supply."],a:2},
+{q:"According to the classical theory of money, reducing inflation will not make workers richer because firms will increase product prices ______ each year and give workers ______ raises.",o:["more; larger","more; smaller","less; larger","less; smaller"],a:2},
+{q:"According to the classical theory of money, inflation does not make workers poorer because wages increase:",o:["faster than the overall price level.","more slowly than the overall price level.","in proportion to the increase in the overall price level.","in real terms during periods of inflation."],a:2},
+{q:"The inconvenience associated with reducing money holdings to avoid the inflation tax is called:",o:["menu costs.","shoeleather costs.","variable yardstick costs.","fixed costs."],a:1},
+{q:"The costs of reprinting catalogs and price lists because of inflation are called:",o:["menu costs.","shoeleather costs.","variable yardstick costs.","fixed costs."],a:0},
+{q:"Inflation ______ the variability of relative prices and ______ the efficiency of the allocation of resources.",o:["increases; increases","increases; decreases","decreases; decreases","decreases; increases"],a:1},
+{q:"In the case of an unanticipated increase in inflation:",o:["creditors with an unindexed contract are hurt because they get less than they expected in real terms.","creditors with an indexed contract gain because they get more than they contracted for in nominal terms.","debtors with an unindexed contract do not gain because they pay exactly what they contracted for in nominal terms.","debtors with an indexed contract are hurt because they pay more than they contracted for in nominal terms."],a:0},
+{q:"The costs of unexpected inflation, but not of expected inflation, are:",o:["menu costs.","the arbitrary redistribution of wealth between debtors and creditors.","unintended distortions of individual tax liabilities.","the costs of relative price variability."],a:1},
+{q:"If inflation was 6 percent last year and a worker received a 4 percent nominal wage increase, then the worker's real wage:",o:["increased 4 percent.","increased 2 percent.","decreased 2 percent.","decreased 6 percent."],a:2},
+{q:"If nominal wages cannot be cut, then the only way to reduce real wages is by:",o:["adjustments via inflation.","unions.","legislation.","productivity increases."],a:0},
+{q:"A rate of inflation that exceeds 50 percent per month is typically referred to as a:",o:["conflagration.","hyperinflation.","deflation.","disinflation."],a:1},
+{q:"Hyperinflations are ultimately the result of excessive growth rates of the money supply; the underlying motive is frequently a government's:",o:["desire to increase prices throughout the economy.","need to generate revenue to pay for spending.","responsibility to increase nominal interest rates by increasing expected inflation.","inability to buy government securities through open-market operations."],a:1},
+{q:"Which of the following would most likely be called a hyperinflation?",o:["Price increases averaged 300 percent per year.","The inflation rate was 10 percent per year.","Real GDP grew at a rate of 12 percent over a year.","A stock market index rose by 1,000 points over a year."],a:0},
+{q:"During a hyperinflation, real tax revenue of the government often drops substantially because of the:",o:["delay between when a tax is levied and when it is collected.","significantly greater menu costs of printing tax forms.","additional deductions taken for increased shoeleather costs.","greater uncertainty associated with extreme rates of inflation."],a:0},
+{q:"The major source of government revenue in most countries experiencing hyperinflation is:",o:["customs duties.","income taxes.","seigniorage.","borrowing."],a:2},
+{q:"To end a hyperinflation, a government trying to reduce its reliance on seigniorage would:",o:["print more money.","raise taxes and cut spending.","lower taxes and increase spending.","lower interest rates."],a:1},
+{q:"Most hyperinflations end with _____ reforms that eliminate the need for _____.",o:["monetary; taxes","monetary; currency","fiscal; seigniorage","fiscal; currency"],a:2},
+{q:"Which of the following is an example of a relative price?",o:["the real interest rate","the capital stock","the dollar wage per hour","the price level"],a:3},
+{q:"Variables expressed in terms of physical units or quantities are called ______ variables.",o:["real","nominal","endogenous","exogenous"],a:0},
+{q:"Variables expressed in terms of money are called ______ variables.",o:["real","nominal","endogenous","exogenous"],a:1},
+{q:"An example of a real variable is the:",o:["dollar wage a person earns.","quantity of goods produced in a year.","price level.","nominal interest rate."],a:1},
+{q:"An example of a nominal variable is the:",o:["money supply.","quantity of goods produced in a year.","relative price of bread.","real wage."],a:0},
+{q:"The classical dichotomy:",o:["cannot hold if money is 'neutral.'","is said to hold when the values of real variables can be determined without any reference to nominal variables or the existence of money.","fully describes the world in which we live, especially in the short run.","arises because money depends on the nominal interest rate."],a:1},
+{q:"According to the classical dichotomy, when the money supply decreases, _____ will decrease.",o:["real GDP","consumption spending","the price level","investment spending"],a:2},
+{q:"The concept of monetary neutrality in the classical model means that an increase in the money supply growth rate will increase:",o:["real GDP.","real interest rates.","nominal interest rates.","both saving and investment by the same amount."],a:2},
+{q:"The characteristic of the classical model that the money supply does not affect real variables is called:",o:["the monetary basis.","monetary policy.","the quantity theory of money.","monetary neutrality."],a:3},
+{q:"The theoretical separation of real and monetary variables is called:",o:["the classical dichotomy.","monetary neutrality.","the Fisher effect.","the quantity theory of money."],a:0},
+{q:"A small country might want to use the money of a large country rather than print its own money if the small country:",o:["is likely to be unstable, whereas the large country is likely to be stable.","is likely to be stable, whereas the large country is likely to be unstable.","needs the revenue for seigniorage.","wants to control its own inflation rate."],a:0},
+{q:"If consumption depends positively on the level of real balances, and real balances depend negatively on the nominal interest rate, then:",o:["the classical dichotomy still holds.","a rise in money growth leads to a fall in consumption and a rise in investment.","a rise in money growth leads to a rise in consumption and a fall in investment.","a rise in money growth leads to a rise in both consumption and investment."],a:1},
+{q:"If consumption depends positively on the level of real balances and real balances depend negatively on the nominal interest rate, then the nominal interest rate:",o:["declines when the money growth rate rises.","is unchanged when the money growth rate rises.","rises 1 percent for each 1 percent rise in the money growth rate.","rises less than 1 percent for each 1 percent rise in the money growth rate."],a:3}
+]},
+
+{id:6,title:"Ch.6 开放经济宏观经济学",color:"#0F6E56",
+questions:[
+{q:"Net exports equal GDP minus domestic spending on:",o:["all goods and services.","all goods and services plus foreign spending on domestic goods and services.","domestic goods and services.","domestic goods and services minus foreign spending on domestic goods and services."],a:0},
+{q:"The value of net exports is also the value of:",o:["net investment.","net saving.","national saving.","the difference of national saving and domestic investment."],a:3},
+{q:"If net capital outflow is positive, then:",o:["imports must be positive.","exports must be negative.","the trade balance must be positive.","the trade balance must be negative."],a:2},
+{q:"Net capital outflow is equal to the amount that:",o:["foreign investors lend here.","domestic investors lend abroad.","foreign investors lend here minus the amount domestic investors lend abroad.","domestic investors lend abroad minus the amount that foreign investors lend here."],a:3},
+{q:"If domestic saving exceeds domestic investment, then net exports are ______ and net capital outflows are ______.",o:["positive; positive","positive; negative","negative; negative","negative; positive"],a:0},
+{q:"In a small, open economy if net exports are negative, then:",o:["domestic spending is greater than output.","saving is greater than investment.","net capital outflows are positive.","imports are less than exports."],a:0},
+{q:"When exports exceed imports, all of the following are true EXCEPT:",o:["net capital outflows are positive.","net exports are positive.","domestic investment exceeds domestic saving.","domestic output exceeds domestic spending."],a:2},
+{q:"In a small open economy, if exports equal $20B, imports equal $30B, and domestic national saving equals $25B, then net capital outflow equals:",o:["–$25 billion.","–$10 billion.","$10 billion.","$25 billion."],a:1},
+{q:"In a small open economy, if exports equal $5B and imports equal $7B, then there is a trade ______ and ______ net capital outflow.",o:["deficit; negative","surplus; negative","deficit; positive","surplus; positive"],a:0},
+{q:"In a small open economy, if domestic saving equals $50B and domestic investment equals $50B, then there is ______, and net capital outflow equals ______.",o:["a trade deficit; $100 billion","balanced trade; $0","a trade surplus; $100 billion","balanced trade; $100 billion"],a:1},
+{q:"In a small open economy, if domestic investment exceeds domestic saving, then the extra investment will be financed by:",o:["borrowing from abroad.","borrowing from domestic banks.","the domestic government.","the World Bank."],a:0},
+{q:"In a small open economy, if domestic saving exceeds domestic investment, then the extra saving will be used to:",o:["make loans to the domestic government.","make loans to foreigners.","repay the national debt.","repay loans to the Federal Reserve."],a:1},
+{q:"If a U.S. corporation sells a product in Europe and uses the proceeds to purchase shares in a European corporation, then U.S. net exports ______, and net capital outflows ______.",o:["increase; increase","increase; decrease","decrease; increase","decrease; decrease"],a:0},
+{q:"If a U.S. corporation purchases a product made in Europe and the European producer uses the proceeds to purchase a U.S. government bond, then U.S. net exports ______, and net capital outflows ______.",o:["increase; increase","increase; decrease","decrease; increase","decrease; decrease"],a:3},
+{q:"If a U.S. corporation sells a product to Canada and uses the proceeds to purchase a product manufactured in Canada, then U.S. net exports ______, and net capital outflows ______.",o:["increase; increase","decrease; decrease","do not change; do not change","do not change; increase"],a:2},
+{q:"A 'closed' economy is one in which the:",o:["level of output is fixed.","price level is fixed.","domestic interest rate equals the world interest rate.","domestic saving is less than domestic investment."],a:2},
+{q:"The world interest rate:",o:["is equal to the domestic interest rate.","makes domestic saving equal to domestic investment.","is the interest rate charged on loans by the World Bank.","is the interest rate prevailing in world financial markets."],a:3},
+{q:"A small open economy with perfect capital mobility is characterized by all of the following EXCEPT that:",o:["its domestic interest rate always exceeds the world interest rate.","it engages in international trade.","its net capital outflows always equal the trade balance.","its government does not impede international borrowing or lending."],a:0},
+{q:"In a small open economy, if the world real interest rate is above the rate at which national saving equals domestic investment, then there will be a trade ______ and ______ net capital outflow.",o:["surplus; negative","deficit; positive","surplus; positive","deficit; negative"],a:2},
+{q:"[Exhibit: S-I graph] In a small open economy, if the world interest rate is r1 (below r*), then the economy has:",o:["a trade surplus.","balanced trade.","a trade deficit.","negative capital outflows."],a:0},
+{q:"[Exhibit: S-I graph] In a small open economy, if the world interest rate is r3 (above r*), then the economy has:",o:["a trade surplus.","balanced trade.","a trade deficit.","positive capital outflows."],a:2},
+{q:"In a small open economy, starting from a position of balanced trade, if the government increases domestic government purchases, this produces a tendency toward a trade ______ and ______ net capital outflow.",o:["deficit; negative","surplus; positive","deficit; positive","surplus; negative"],a:0},
+{q:"In a small open economy, starting from a position of balanced trade, if the government increases the income tax, this produces a tendency toward a trade ______ and ______ net capital outflow.",o:["deficit; negative","surplus; positive","deficit; positive","surplus; negative"],a:1},
+{q:"Holding other factors constant, legislation to cut taxes in an open economy will:",o:["increase national saving and lead to a trade surplus.","increase national saving and lead to a trade deficit.","reduce national saving and lead to a trade surplus.","reduce national saving and lead to a trade deficit."],a:3},
+{q:"Starting from a small open economy with balanced trade, if large foreign countries increase their domestic government purchases, this policy will tend to increase:",o:["investment in the small open economy.","saving in the small open economy.","exports by the small open economy.","imports by the small open economy."],a:2},
+{q:"Starting from a trade balance, if the world interest rate falls, then, holding other factors constant, in a small open economy the amount of domestic investment will _____, and net exports will _____.",o:["increase; increase","increase; decrease","increase; not change","decrease; increase"],a:1},
+{q:"If the government of a small open economy wishes to reduce a trade deficit, which policy action will be successful?",o:["increasing taxes","increasing government spending","increasing investment tax credits","imposing protectionist trade policies"],a:0},
+{q:"The adoption of an investment tax credit in a small open economy is likely to lead to:",o:["no change in either domestic investment or domestic saving.","an increase in both domestic investment and domestic saving.","an increase in domestic saving but no change in domestic investment.","an increase in domestic investment but no change in domestic saving."],a:3},
+{q:"In a small open economy, policies that increase:",o:["investment tend to cause a trade surplus.","investment tend to cause a trade deficit.","saving do not affect the trade balance.","saving tend to cause a trade deficit."],a:1},
+{q:"Based on a Cobb–Douglas production function and perfect capital mobility, capital should flow to economies in which:",o:["capital is relatively scarce.","capital is relatively abundant.","technological production capabilities are inferior.","labor is relatively scarce."],a:0},
+{q:"The nominal exchange rate between the U.S. dollar and the Japanese yen (in $ per yen) is the:",o:["number of yen you can get for lending one dollar in Japan for one year.","number of yen you can get for one dollar.","price of U.S. goods divided by the price of Japanese goods.","price of Japanese goods divided by the price of U.S. goods."],a:1},
+{q:"The real exchange rate:",o:["measures how many Japanese yen you can get for one U.S. dollar.","is equal to the nominal exchange rate multiplied by the domestic price level divided by the foreign price level.","is equal to the nominal exchange rate multiplied by the foreign price level divided by the domestic price level.","is the price of a domestic car divided by the price of a foreign car."],a:1},
+{q:"If the number of dollars per yen rises, this is called a(n):",o:["appreciation of the dollar.","appreciation of the yen.","increase in the terms of trade.","decrease in the terms of trade."],a:1},
+{q:"If 5 Swiss francs trade for $1, the U.S. price level = $1 for a good, and the Swiss price level = 2 francs for the same good, then the real exchange rate is ______ Swiss good(s) per U.S. good.",o:["0.4","2.5","5","10"],a:1},
+{q:"When the real exchange rate rises:",o:["exports will decrease but imports will be unaffected.","imports will decrease but exports will be unaffected.","exports will increase and imports will decrease.","exports will decrease and imports will increase."],a:3},
+{q:"If the real exchange rate depreciates from 1 Japanese good per U.S. good to 0.5 Japanese good per U.S. good, then U.S. exports ______, and U.S. imports ______.",o:["increase; increase","decrease; decrease","increase; decrease","decrease; increase"],a:2},
+{q:"The lower the real exchange rate is, the ______ expensive domestic goods are relative to foreign goods, and the ______ the demand is for net exports.",o:["more; greater","more; smaller","less; greater","less; smaller"],a:2},
+{q:"In a small open economy in equilibrium:",o:["saving is fixed, and investment is determined by the investment function and the world interest rate.","investment is fixed, and saving is determined by the saving function and the world interest rate.","saving is fixed, and investment is determined by the trade balance.","investment is fixed, and saving is determined by the trade balance."],a:0},
+{q:"If a graph is drawn with net exports on the horizontal axis and the real exchange rate on the vertical axis, then the real exchange rate is determined by the intersection of the ______ net-exports schedule and the ______ line representing saving minus investment.",o:["downward-sloping; vertical","upward-sloping; vertical","downward-sloping; upward-sloping","upward-sloping; downward-sloping"],a:0},
+{q:"The real exchange rate is determined by the equality of:",o:["saving and the demand for net exports.","investment and the demand for net exports.","net capital outflow and the demand for net exports.","the negative value of net capital outflow and the demand for net exports."],a:2},
+{q:"In a small open economy with perfect capital mobility, a reduction in the government's budget deficit ______ net exports, and the real exchange rate ______.",o:["increases; appreciates","increases; depreciates","decreases; appreciates","decreases; depreciates"],a:1},
+{q:"In a small open economy, when foreign governments reduce national saving in their countries, the equilibrium real exchange rate:",o:["rises, and home country net exports fall.","rises, and home country net exports rise.","falls, and home country net exports fall.","falls, and home country net exports rise."],a:3},
+{q:"In a small open economy, if the world interest rate falls, then domestic investment will _____, and the real exchange rate will _____, holding all else constant.",o:["decrease; decrease","decrease; increase","increase; decrease","increase; increase"],a:2},
+{q:"If the information technology boom increases investment demand in a small open economy, then net exports ______, and the real exchange rate ______.",o:["increase; appreciates","increase; depreciates","decrease; appreciates","decrease; depreciates"],a:2},
+{q:"An appreciation of the real exchange rate in a small open economy could be the result of:",o:["an increase in government spending.","an increase in taxes.","a decrease in the world interest rate.","the expiration of an investment tax-credit provision."],a:1},
+{q:"A depreciation of the real exchange rate in a small open economy could be the result of:",o:["a domestic tax cut.","an increase in government spending.","a decrease in the world interest rate.","the expiration of an investment tax-credit provision."],a:3},
+{q:"In a small open economy, if the government adopts a policy that lowers imports, then that policy:",o:["raises the real exchange rate and increases net exports.","raises the real exchange rate and does not change net exports.","raises the real exchange rate and decreases net exports.","lowers the real exchange rate."],a:1},
+{q:"An effective policy to reduce a trade deficit in a small open economy would be to:",o:["increase tariffs on imports.","impose stricter quotas on imported goods.","increase government spending.","increase taxes."],a:3},
+{q:"Protectionist policies in a small open economy with a trade deficit have the effect of ______ the trade deficit and ______ the quantity of imports and exports.",o:["decreasing; decreasing","not changing; decreasing","decreasing; not changing","not changing; not changing"],a:1},
+{q:"Which of the following would decrease the real exchange rate in a small open economy?",o:["a personal income tax cut","a reduction in government spending","a tariff on imports","an increase in investment"],a:1},
+{q:"[Exhibit Q] Which panel illustrates the impact of CONTRACTIONARY FISCAL POLICIES AT HOME on the real exchange rate?",o:["(A)","(B)","(C)","(D)"],a:0},
+{q:"[Exhibit Q] Which panel illustrates the impact of CONTRACTIONARY FISCAL POLICIES ABROAD on the real exchange rate?",o:["(A)","(B)","(C)","(D)"],a:1},
+{q:"[Exhibit Q] Which panel illustrates the impact of an INCREASE IN INVESTMENT DEMAND on the real exchange rate?",o:["(A)","(B)","(C)","(D)"],a:2},
+{q:"[Exhibit Q] Which panel illustrates the impact of PROTECTIONIST TRADE POLICIES on the real exchange rate?",o:["(A)","(B)","(C)","(D)"],a:3},
+{q:"[Exhibit Q] Which panel illustrates the impact of an INCREASE IN HOUSEHOLD SAVING on the real exchange rate?",o:["(A)","(B)","(C)","(D)"],a:0},
+{q:"The percentage change in the nominal exchange rate equals the percentage change in the real exchange rate plus the:",o:["foreign inflation rate minus the domestic inflation rate.","domestic inflation rate minus the foreign inflation rate.","foreign exchange rate minus the domestic exchange rate.","domestic interest rate minus the foreign interest rate."],a:0},
+{q:"If a country has a high rate of inflation relative to the United States (holding the real exchange rate fixed), the dollar will buy:",o:["less of the foreign currency over time.","more of the foreign currency over time.","the same amount of the foreign currency over time.","an amount of foreign currency determined by the real exchange rate."],a:1},
+{q:"If the real exchange rate between the U.S. and Japan remains unchanged, and the U.S. inflation rate is 6 percent and Japan's is 3 percent, the:",o:["dollar will appreciate by 3 percent against the yen.","yen will appreciate by 3 percent against the dollar.","yen will appreciate by 6 percent against the dollar.","yen will appreciate by 9 percent against the dollar."],a:1},
+{q:"The U.S. dollar exchange rate (units of foreign currency per U.S. dollar) for currencies of countries with HIGH inflation relative to the U.S. has tended to ______, and for countries with LOW inflation relative to the U.S. has tended to ______.",o:["appreciate; appreciate","appreciate; depreciate","depreciate; depreciate","depreciate; appreciate"],a:3},
+{q:"If the purchasing-power parity theory is true, then:",o:["the net exports schedule is very steep.","all changes in the real exchange rate result from changes in price levels.","all changes in the nominal exchange rate result from changes in price levels.","changes in saving or investment influence only the real exchange rate."],a:2},
+{q:"If purchasing-power parity holds, then changes in domestic saving will _____ the real exchange rate.",o:["increase","decrease","not change","either increase or decrease"],a:2},
+{q:"According to purchasing-power parity, if the dollar price of oil is higher in New York than in London, arbitrageurs will _____ oil in New York and _____ oil in London to drive _____ the price of oil in New York.",o:["buy; sell; up","buy; sell; down","sell; buy; up","sell; buy; down"],a:3},
+{q:"Purchasing-power parity theory:",o:["is a completely accurate description of the real world.","would be entirely accurate if only goods were traded.","would be entirely accurate if all consumers had the same preferences.","provides a reason to expect that movements in the real exchange rate will typically be small or temporary."],a:3},
+{q:"Net capital outflow in a large country:",o:["rises as the real domestic interest rate rises.","declines as the domestic interest rate rises.","depends on the foreign interest rate.","depends only on domestic saving."],a:1},
+{q:"For a closed economy, when net capital outflow (NCF) is on the horizontal axis and the real interest rate is on the vertical axis, NCF is drawn as a:",o:["vertical line at 0.","horizontal line at the world real interest rate.","line that slopes up and to the right.","line that slopes down and to the right."],a:0},
+{q:"For an open economy with perfect capital mobility, NCF is drawn as a:",o:["vertical line at 0.","horizontal line at the world real interest rate.","line that slopes up and to the right.","line that slopes down and to the right."],a:1},
+{q:"In a large open economy, the real interest rate is determined by:",o:["national saving, the domestic investment function, and the net capital outflow function.","national saving, the domestic investment function, and the net exports function.","the domestic investment function, the net capital outflow function, and the net exports function.","national saving, the domestic investment function, the net capital outflow function, and the net exports function."],a:0},
+{q:"In a large open economy, the interest rate adjusts so that domestic saving equals:",o:["domestic investment.","net exports.","net capital outflow.","domestic investment plus net capital outflow."],a:3},
+{q:"In a large open economy, the exchange rate adjusts so that net exports equal:",o:["domestic saving.","domestic investment.","net capital outflow.","domestic investment plus net capital outflow."],a:2},
+{q:"Expansionary fiscal policy in a large open economy ______ the real interest rate and ______ the real exchange rate.",o:["does not change; increases","increases; increases","increases; decreases","decreases; increases"],a:1},
+{q:"In a large open economy, an investment tax credit raises the real interest rate, ______ the trade balance, and ______ net capital outflow.",o:["decreases; decreases","increases; increases","decreases; increases","increases; decreases"],a:0},
+{q:"In a large open economy, if an import quota is adopted, then:",o:["net exports remain unchanged, as imports and exports decrease by equal amounts, while the real exchange rate rises.","net exports remain unchanged, as imports and exports decrease by equal amounts, while the real exchange rate falls.","net exports rise and the real exchange rate rises.","net exports rise and the real exchange rate falls."],a:0},
+{q:"In a large open economy, if political instability abroad lowers the net capital outflow function, then the real interest rate:",o:["rises, while the real exchange rate rises and net exports fall.","rises, while the real exchange rate falls and net exports rise.","falls, while the real exchange rate rises and net exports rise.","falls, while the real exchange rate rises and net exports fall."],a:3},
+{q:"In a small open economy, if consumer confidence falls and consumers decide to save more, then the real exchange rate:",o:["rises, and net exports fall.","and net exports both rise.","falls, and net exports rise.","and net exports both fall."],a:2},
+{q:"In a small open economy, if consumers shift their preference toward Japanese cars, then net exports:",o:["fall, and the real exchange rate falls.","fall, but the real exchange rate remains unchanged.","remain unchanged, but the real exchange rate falls.","increase, and the real exchange rate remains unchanged."],a:2},
+{q:"In a small open economy, if the introduction of automatic teller machines reduces the demand for money, then net exports:",o:["fall, and the real exchange rate falls.","fall, but the real exchange rate remains unchanged.","remain unchanged, but the real exchange rate falls.","increase, and the real exchange rate remains unchanged."],a:3},
+{q:"Assume that some large foreign countries decide to subsidize investment by instituting an investment tax credit. Then a small country's real exchange rate:",o:["will fall, and its net exports will rise.","will rise, and its net exports will fall.","and net exports will both fall.","and net exports will both rise."],a:0},
+{q:"If the nominal interest rates in the U.S. and Canada are 8 percent and 12 percent, the real interest rates are the same, and the real exchange rate is fixed, then the market's expectation about the number of Canadian dollars per U.S. dollar a year from now will be that it will:",o:["decrease by 8 percent.","decrease by 4 percent.","increase by 4 percent.","increase by 5 percent."],a:2},
+{q:"Assume that a war breaks out abroad, and foreign investors choose to invest more in the large safe United States. Then, the U.S. real interest rate:",o:["and net exports will both fall.","will fall, and net exports will rise.","will rise, and net exports will fall.","and net exports will both rise."],a:0}
+]},
+
+{id:7,title:"Ch.7 失业",color:"#993556",
+questions:[
+{q:"The macroeconomic problem that affects individuals most directly and severely is:",o:["inflation.","unemployment.","low savings.","low investment."],a:1},
+{q:"The natural rate of unemployment is:",o:["the average rate of unemployment around which the economy fluctuates.","about 10 percent of the labor force.","a rate that never changes.","the transition of individuals between employment and unemployment."],a:0},
+{q:"If the number of employed workers equals 200 million and the number of unemployed workers equals 20 million, the unemployment rate equals ______ percent (rounded to the nearest percent).",o:["0","9","11","20"],a:1},
+{q:"When the unemployment rate is at a steady state:",o:["no hiring or firings are occurring.","the number of people finding jobs equals the number of people losing jobs.","the number of people finding jobs exceeds the number of people losing jobs.","the number of people losing jobs exceeds the number of people finding jobs."],a:1},
+{q:"In the model of the steady-state unemployment rate, the rate of job finding equals the percentage of the ______ who find a job each month, while the rate of job separation equals the percentage of the ______ who lose their job each month.",o:["labor force; labor force","labor force; unemployed","employed; labor force","unemployed; employed"],a:3},
+{q:"A policy that increases the job-finding rate _____ the natural rate of unemployment.",o:["will increase","will decrease","will not change","could either increase or decrease"],a:1},
+{q:"A policy that decreases the job separation rate _____ the natural rate of unemployment.",o:["will increase","will decrease","will not change","could either increase or decrease"],a:1},
+{q:"If s is the rate of job separation, f is the rate of job finding, and both rates are constant, then the steady state unemployment rate is approximately:",o:["f / (f + s).","(f + s) / f.","s / (s + f).","(s + f) / s."],a:2},
+{q:"If the rate of job separation is 0.01 and the rate of job finding is 0.09, then the natural rate of unemployment is:",o:["1 percent.","9 percent.","10 percent.","about 11 percent."],a:2},
+{q:"If the steady-state rate of unemployment equals 0.10 and the rate of job separations is 0.02, then the rate of job findings must be:",o:["0.02.","0.08.","0.10.","0.18."],a:3},
+{q:"If the steady-state rate of unemployment equals 0.125 and the rate of job findings is 0.56, then the rate of job separations must be:",o:["0.08.","0.125.","0.22.","0.435."],a:0},
+{q:"Any policy aimed at lowering the natural rate of unemployment must either ______ the rate of job separation or ______ the rate of job finding.",o:["reduce; reduce","increase; increase","reduce; increase","increase; reduce"],a:2},
+{q:"One reason for unemployment is that:",o:["it takes time to match workers and jobs.","all jobs are identical.","the labor market is always in equilibrium.","a laid-off worker can immediately find a new job at the market wage."],a:0},
+{q:"All of the following are reasons for frictional unemployment EXCEPT:",o:["workers have different preferences and abilities.","unemployed workers accept the first job offer that they receive.","the flow of information is imperfect.","geographic mobility takes time."],a:1},
+{q:"Frictional unemployment is unemployment caused by:",o:["wage rigidity.","minimum-wage legislation.","the time it takes workers to search for a job.","clashes between the motives of insiders and outsiders."],a:2},
+{q:"Which of the following is an example of frictional unemployment?",o:["Dave searches for a new job after voluntarily moving to San Diego.","Elaine is willing to work for less than the minimum wage, but employers cannot hire her for less.","Bill is qualified and would like to be an airline pilot, but airlines do not find it profitable to hire him at the union wage.","Joan is willing to work for less than the going wage, but there are no jobs available."],a:0},
+{q:"Sectoral shifts:",o:["lead to wage rigidity.","explain the payment of efficiency wages.","depend on the level of the minimum wage.","make frictional unemployment inevitable."],a:3},
+{q:"Economists call the changes in the composition of demand among industries and regions:",o:["insider–outsider conflicts.","sectoral shifts.","moral hazard.","adverse selection."],a:1},
+{q:"Frictional unemployment is inevitable because:",o:["different sectors do not shift.","the economy needs to be lubricated.","workers never quit their jobs to change careers.","the demand for different goods always fluctuates."],a:3},
+{q:"Unemployment insurance increases the amount of frictional unemployment by:",o:["making workers more frantic in their search for new jobs.","inducing workers to accept the first job offer that they receive.","making employers more reluctant to lay off workers.","softening the economic hardship of unemployment."],a:3},
+{q:"Which of the following policies were NOT adopted by the government in an attempt to reduce the natural rate of unemployment?",o:["unemployment insurance","government employment agencies","public retraining programs","the Illinois bonus program for unemployment insurance claimants who found jobs quickly"],a:0},
+{q:"Government policies directed at reducing frictional unemployment include:",o:["abolishing minimum-wage laws.","making unemployment insurance 100 percent experience rated.","increasing the earned income credit.","making government part of the union–firm wage bargaining process."],a:1},
+{q:"Public policy to increase the job finding rate includes _____, and public policy to decrease the job separation rate includes _____.",o:["government employment agencies; higher unemployment insurance benefits","government employment agencies; 100 percent experience-rated unemployment insurance","higher minimum wage laws; payment of unemployment benefits for longer periods","higher efficiency wages; partially experience-rated unemployment insurance"],a:1},
+{q:"According to studies of individual unemployed workers, these workers are most likely to find a job:",o:["about three months before their unemployment insurance runs out.","within a few weeks of their unemployment insurance running out.","about three months after their unemployment insurance runs out.","at a time not influenced by the remaining number of weeks of unemployment insurance."],a:1},
+{q:"The unemployment resulting when real wages are held above equilibrium is called ______ unemployment, while the unemployment that occurs as workers search for a job that best suits their skills is called ______ unemployment.",o:["efficiency; inefficiency","efficiency; structural","frictional; efficiency","structural; frictional"],a:3},
+{q:"Wage rigidity:",o:["forces labor demand to equal labor supply.","is caused by sectoral shifts.","prevents labor demand and labor supply from reaching the equilibrium level.","increases the rate of job finding."],a:2},
+{q:"When the real wage is above the level that equilibrates supply and demand:",o:["the quantity of labor supplied exceeds the quantity demanded.","the quantity of labor demanded exceeds the quantity supplied.","there is no unemployment.","the labor market clears."],a:0},
+{q:"Workers unemployed as a result of wage rigidity are:",o:["actively searching for a job to match their skills.","not eligible to receive unemployment insurance benefits.","waiting for a job to become available.","relocating to another part of the country as a result of sectoral shifts."],a:2},
+{q:"Which of the following is the best example of structural unemployment?",o:["Tim is looking for a job with flexible hours but has not been offered one yet.","Vickie lost her job as a graphic artist because she did not have training in computer-generated animation.","Kirby is seeking a job as an airline pilot, but the high union wages in the industry have limited the number of jobs available.","Fatima lost her job at a packing plant but has not looked very intensively for a new job because she still has two months of unemployment insurance benefits left."],a:2},
+{q:"All of the following are causes of structural unemployment EXCEPT:",o:["minimum-wage laws.","the monopoly power of unions.","unemployment insurance.","efficiency wages."],a:2},
+{q:"If wage rigidity holds the real wage above the equilibrium level, an increase in the supply of labor will ______ the number unemployed.",o:["increase","decrease","not change","possibly increase, decrease, or leave unchanged"],a:0},
+{q:"Permitting a lower minimum wage for teenagers would likely:",o:["raise teenage unemployment.","raise teenage wages overall.","prevent teenagers from getting job experience.","raise unemployment among unskilled adults."],a:3},
+{q:"The earned income tax credit:",o:["increases the government's tax revenue.","reduces the incomes of poor working families.","does not raise labor costs.","is not an alternative to raising the minimum wage."],a:2},
+{q:"Which of the following statements about minimum-wage workers in the United States is NOT correct:",o:["minimum-wage workers are more likely to be male.","minimum-wage workers are more likely to work part time.","minimum-wage workers are more likely to be less educated.","minimum-wage workers are more likely to be young."],a:0},
+{q:"Unions contribute to structural unemployment when collective bargaining results in wages:",o:["above the equilibrium level.","below the minimum wage.","below the equilibrium level.","above the level of unemployment compensation."],a:0},
+{q:"In the case of unions, the conflict of interest between different groups of workers results in insiders wanting ______, while outsiders want ______.",o:["more hirings; high wages","high wages; more hirings","high wages; fewer hirings","fewer hirings; high wages"],a:1},
+{q:"When insiders have a much greater impact on the wage-bargaining process than do outsiders, the negotiated wage is likely to be ______ the equilibrium wage.",o:["much greater than","much less than","almost equal to","about one-half of"],a:0},
+{q:"Centralized union wage bargaining with government intervention gives relatively more influence to ______, while firm-level union wage bargaining gives relatively more influence to ______.",o:["efficiency wages; sectoral shifts","sectoral shifts; efficiency wages","insiders; outsiders","outsiders; insiders"],a:3},
+{q:"One efficiency-wage theory implies that firms pay high wages because:",o:["this practice increases the problem of moral hazard.","in wealthy countries, it is important to pay workers high wages to improve their health.","the more a firm pays its workers, the greater their incentive to stay with the firm.","paying high wages promotes adverse selection."],a:2},
+{q:"Efficiency-wage theories suggest that a firm may pay workers more than the market-clearing wage for all of the following reasons EXCEPT to:",o:["reduce labor turnover.","improve the quality of the firm's labor force.","increase worker effort.","reduce the firm's wage bill."],a:3},
+{q:"According to efficiency-wage theories, firms benefit by paying higher-than-equilibrium wages because worker _____ increases.",o:["productivity","turnover","unionization","shirking"],a:0},
+{q:"Paying efficiency wages helps firms reduce the problem of adverse selection by:",o:["generating additional profits that can be used to pay for more proficient hiring managers.","keeping labor unions from organizing workers in the firm.","encouraging unsupervised workers to maintain a high level of productivity.","providing an incentive for the best-qualified workers to remain with the firm."],a:3},
+{q:"Paying efficiency wages helps firms reduce the problem of moral hazard by:",o:["generating additional profits that can be used to improve working conditions.","matching the wages each worker is paid to the number of units of output each worker produces.","encouraging unsupervised workers to maintain a high level of productivity.","providing an incentive for the best-qualified workers to remain with the firm."],a:2},
+{q:"By paying efficiency wages, firms contribute to higher unemployment because they:",o:["increase the wage bill.","make workers more productive.","keep the wage below the equilibrium level.","keep the wage above the equilibrium level."],a:3},
+{q:"Over the course of a year 100 people are unemployed for 4 weeks each, while 10 people are unemployed for 52 weeks each. What percentage of the total SPELLS of unemployment were attributable to the long-term unemployed?",o:["9 percent","10 percent","43.5 percent","56.5 percent"],a:0},
+{q:"Over the course of a year 100 people are unemployed for 4 weeks each, while 10 people are unemployed for 52 weeks each. What percentage of the total WEEKS of unemployment were attributable to the long-term unemployed?",o:["9 percent","10 percent","43.5 percent","56.5 percent"],a:3},
+{q:"Policies to substantially reduce the natural rate of unemployment should be targeted at:",o:["the short-term unemployed.","the long-term unemployed.","discouraged workers.","insiders and outsiders."],a:1},
+{q:"Short-term unemployment is most likely to be ______ unemployment, while long-term unemployment is most likely to be _____ unemployment.",o:["structural; frictional","structural; the natural rate of","the natural rate of; frictional","frictional; structural"],a:3},
+{q:"Most spells of unemployment are ______ term, and most weeks of unemployment are attributable to ______-term unemployment.",o:["short; short","short; long","long; long","long; short"],a:1},
+{q:"Data on unemployment in the United States show that:",o:["most spells of unemployment are long.","most weeks of unemployment are attributable to the long-term unemployed.","members of the labor force over age 55 have the highest unemployment rates.","the duration of unemployment falls during recessions."],a:1},
+{q:"Which of the following characteristics made the 2008–2009 recession differ most sharply from previous recessions?",o:["a large spike in the duration of unemployment","a large increase in teenage unemployment","higher rates of female unemployment than rates of male unemployment","an increase in the rate of job separation and a decrease in the rate of job finding"],a:0},
+{q:"Differences in unemployment rates across demographic groups are most closely correlated with differences in:",o:["job-finding rates.","job-separation rates.","unionization rates.","efficiency wage rates."],a:1},
+{q:"Entry into and exit from the labor force are important to the determination of the unemployment rate because:",o:["more than one-half of the unemployed have only recently entered the labor force.","most of the unemployed are young workers still looking for their first job.","discouraged workers are counted as part of the labor force.","almost one-half of all spells of unemployment end in the unemployed person's withdrawal from the labor market."],a:3},
+{q:"Spells of unemployment end when the unemployed person finds a job or:",o:["withdraws from the labor force.","enters the labor force.","runs out of unemployment insurance compensation.","refuses to answer unemployment survey questions."],a:0},
+{q:"Transitions into and out of the labor force:",o:["rarely occur.","do not affect unemployment statistics.","make the interpretation of unemployment statistics complicated.","reduce the amount of frictional unemployment."],a:2},
+{q:"Discouraged workers are counted as:",o:["part of the labor force.","out of the labor force.","employed.","unemployed."],a:1},
+{q:"Discouraged workers are individuals who:",o:["have jobs that do not match their skills (e.g., a Ph.D. driving a taxi cab).","have been unemployed for more than 26 weeks.","call themselves unemployed but are not seriously looking for a job.","want a job but have given up looking for one."],a:3},
+{q:"As the relative demand for unskilled workers falls, wages for unskilled workers ______, and unemployment compensation becomes a ______ attractive option.",o:["fall; more","fall; less","rise; more","rise; less"],a:0},
+{q:"Much of the difference in unemployment rates across Europe is attributable to differences in:",o:["short-term unemployment.","long-term unemployment.","frictional unemployment.","the natural rate of unemployment."],a:1},
+{q:"Which of the following statements most closely describes the variation in unemployment rates across countries in Europe?",o:["Countries with higher unionization tend to have higher unemployment rates, but this is partially mitigated if wage negotiations are coordinated among employers.","Countries with higher unionization tend to have higher unemployment rates, and this tendency is exacerbated if wage negotiations are coordinated among employers.","Countries with more generous unemployment insurance benefits tend to have higher unemployment rates, but this is partially mitigated if the benefits are offered for a longer period of time.","Countries with more generous unemployment insurance tend to have lower unemployment rates, but this effect is completely offset if benefits are offered for a longer period of time."],a:0},
+{q:"Across countries of Europe, greater spending on unemployment insurance tends to _____ unemployment, and more 'active' labor-market policies tend to _____ unemployment.",o:["increase; increase","increase; decrease","decrease; decrease","decrease; increase"],a:1},
+{q:"Examples of 'active' labor-market policies include all of the following EXCEPT:",o:["job-search assistance","subsidized employment","unemployment insurance","job-training programs"],a:2},
+{q:"The generosity of unemployment insurance benefits is measured by:",o:["the replacement rate and the duration of benefits.","the median wage and the unemployment rate.","the price level and duration of unemployment.","the job-finding rate and the job-separation rate."],a:0},
+{q:"Earlier retirement in Europe than in the United States contributes to:",o:["higher employment-to-population ratios in Europe than in the United States.","lower employment-to-population ratios in Europe than in the United States.","more hours worked per year by the average employed person in Europe.","fewer hours worked per year by the average employed person in Europe."],a:1},
+{q:"More frequent holidays for workers in Europe than in the United States contribute to:",o:["higher employment-to-population ratios in Europe than in the United States.","lower employment-to-population ratios in Europe than in the United States.","more hours worked per year by the average employed person in Europe.","fewer hours worked per year by the average employed person in Europe."],a:3},
+{q:"Which of the following hypotheses is consistent with fewer hours worked per year in Europe than in the United States?",o:["fewer mandated holidays in Europe than in the United States","higher employment-to-population ratios in Europe than in the United States","higher tax rates in Europe than in the United States","a smaller underground economy in Europe than in the United States"],a:2},
+{q:"If the underground economy is larger in Europe than in the United States, then the difference in the _____ number of hours worked between Europe and the U.S. may be smaller than the difference in the _____ numbers of hours worked.",o:["measured; actual","actual; measured","annual; monthly","monthly; annual"],a:1},
+{q:"According to Olivier Blanchard, Europeans are more likely to use increases in real wages from technological progress to increase ______, and Americans are more likely to use these increases to increase ______.",o:["hours of work; hours of leisure","consumption of goods and services; hours of leisure","hours of leisure; consumption of goods and services","unemployment insurance benefits; efficiency wages"],a:2},
+{q:"If the rate of separation is 0.02 and the rate of job finding is 0.08 but the current unemployment rate is 0.10, then the current unemployment rate is ______ the equilibrium rate, and in the next period it will move ______ the equilibrium rate.",o:["above; toward","above; away from","below; toward","below; away from"],a:2},
+{q:"Assume that a country experiences a reduction in productivity that lowers the marginal product of labor for any given level of labor. In this case, the:",o:["labor supply curve shifts to the right.","labor supply curve shifts to the left.","labor demand curve shifts upward and to the right.","labor demand curve shifts downward and to the left."],a:3},
+{q:"If a reduction in productivity shifts the labor demand curve downward and to the left, and the labor market were always in equilibrium, this would lead to:",o:["a lower real wage and a rise in unemployment.","a lower real wage and no change in unemployment.","a lower real wage and less unemployment.","no change in real wage or in unemployment."],a:1},
+{q:"If a reduction in productivity shifts the labor demand curve downward and to the left, and the real wage were rigid, this would lead to:",o:["no change in the real wage and a rise in unemployment.","no change in the real wage and no change in unemployment.","no change in the real wage and a fall in unemployment.","a decrease in the real wage."],a:0}
+]}
+];
+
+</script>
+
+<script id="mainScript">
+// ===== STATE =====
+let deck = [];
+let wrongIds = {}; // keyed by "chapterId_qIdx"
+let mode = 'chapter'; // 'chapter' | 'mixed' | 'wrong'
+let shuffled = false;
+let wrongOnly = false;
+let curChapterId = null;
+let idx = 0, correct = 0, answered = 0;
+let answeredThis = false;
+let chapterProgress = {}; // { chId: { correct, answered, done } }
+
+const LABELS = ['A','B','C','D'];
+const COLORS = ['#3dba7c','#4e7ef7','#f5a623','#e05a5a','#a855f7','#06b6d4','#ec4899'];
+
+// ===== INIT =====
+function init() {
+  buildSidebar();
+  showWelcome();
+}
+
+function buildSidebar() {
+  const list = document.getElementById('chapterList');
+  list.innerHTML = '';
+  CHAPTERS.forEach((ch, i) => {
+    const p = chapterProgress[ch.id] || {};
+    const pct = p.answered > 0 ? Math.round((p.correct / p.answered) * 100) : 0;
+    const div = document.createElement('div');
+    div.className = 'chapter-item' + (curChapterId === ch.id && mode !== 'mixed' ? ' active' : '');
+    div.innerHTML = `
+      <span class="chapter-dot" style="background:${COLORS[i % COLORS.length]}"></span>
+      <span class="chapter-name">${ch.title}</span>
+      <span class="chapter-count">${ch.questions.length}题</span>
+      ${p.answered ? `<div class="chapter-prog" style="width:${Math.min(100, Math.round((idx+1)/deck.length*100))}%"></div>` : ''}
+    `;
+    div.onclick = () => startChapter(ch.id);
+    list.appendChild(div);
+  });
+  const mixBtn = document.getElementById('mixedBtn');
+  if (mixBtn) mixBtn.className = 'mixed-btn' + (mode === 'mixed' ? ' active' : '');
+}
+
+function showWelcome() {
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('progWrap').style.display = 'none';
+  const totalQ = CHAPTERS.reduce((s, c) => s + c.questions.length, 0);
+  let html = `<div class="welcome">
+    <h1>中级宏观经济学</h1>
+    <p>共 7 章，${totalQ} 道选择题。选择章节开始练习，或混合练习全部题目。</p>
+    <div class="chapter-cards">`;
+  CHAPTERS.forEach((ch, i) => {
+    html += `<div class="ccard" onclick="startChapter(${ch.id})">
+      <div class="ccard-name"><span class="ccard-dot" style="background:${COLORS[i%COLORS.length]}"></span>${ch.title}</div>
+      <div class="ccard-count">${ch.questions.length} 道选择题</div>
+    </div>`;
+  });
+  html += `</div>
+    <button class="nav-btn primary" onclick="startMixed()" style="font-size:14px;padding:10px 24px">🔀 混合练习全部 ${totalQ} 题</button>
+  </div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+function startChapter(chId) {
+  curChapterId = chId;
+  mode = 'chapter';
+  wrongOnly = false;
+  idx = 0; correct = 0; answered = 0; answeredThis = false;
+  const ch = CHAPTERS.find(c => c.id === chId);
+  deck = ch.questions.map((q, i) => ({...q, _key: `${chId}_${i}`}));
+  if (shuffled) deck.sort(() => Math.random() - .5);
+  updateTopbar();
+  buildSidebar();
+  render();
+}
+
+function startMixed() {
+  mode = 'mixed';
+  curChapterId = null;
+  wrongOnly = false;
+  idx = 0; correct = 0; answered = 0; answeredThis = false;
+  deck = [];
+  CHAPTERS.forEach(ch => {
+    ch.questions.forEach((q, i) => {
+      deck.push({...q, _key: `${ch.id}_${i}`, _chId: ch.id});
+    });
+  });
+  deck.sort(() => Math.random() - .5);
+  shuffled = true;
+  updateTopbar();
+  buildSidebar();
+  render();
+}
+
+function toggleShuffle() {
+  shuffled = !shuffled;
+  document.getElementById('shuffleBtn').className = 'ctrl-btn' + (shuffled ? ' on' : '');
+  if (deck.length > 0) {
+    if (wrongOnly) startWrongOnly();
+    else if (mode === 'chapter') startChapter(curChapterId);
+    else startMixed();
+  }
+}
+
+function toggleWrong() {
+  const wCount = Object.keys(wrongIds).length;
+  if (wCount === 0) { alert('暂无错题！'); return; }
+  wrongOnly = !wrongOnly;
+  if (wrongOnly) startWrongOnly();
+  else {
+    wrongOnly = false;
+    if (mode === 'chapter') startChapter(curChapterId);
+    else startMixed();
+  }
+}
+
+function startWrongOnly() {
+  wrongOnly = true;
+  idx = 0; correct = 0; answered = 0; answeredThis = false;
+  const wKeys = Object.keys(wrongIds);
+  deck = [];
+  CHAPTERS.forEach(ch => {
+    ch.questions.forEach((q, i) => {
+      const key = `${ch.id}_${i}`;
+      if (wKeys.includes(key)) deck.push({...q, _key: key, _chId: ch.id});
+    });
+  });
+  if (shuffled) deck.sort(() => Math.random() - .5);
+  updateTopbar();
+  render();
+}
+
+function updateTopbar() {
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('progWrap').style.display = 'block';
+  const ch = curChapterId ? CHAPTERS.find(c => c.id === curChapterId) : null;
+  const tag = document.getElementById('chapterTag');
+  tag.textContent = wrongOnly ? '错题本' : (mode === 'mixed' ? '混合练习' : (ch ? ch.title : '—'));
+  tag.style.background = ch && mode !== 'mixed' ? COLORS[(ch.id-1) % COLORS.length] + '33' : '#2a2e42';
+  document.getElementById('shuffleBtn').className = 'ctrl-btn' + (shuffled ? ' on' : '');
+  const wCount = Object.keys(wrongIds).length;
+  document.getElementById('wrongBtn').className = 'ctrl-btn' + (wrongOnly ? ' on' : '');
+  document.getElementById('wrongCount').textContent = wCount > 0 ? `(${wCount})` : '';
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('scoreNum').textContent = correct;
+  document.getElementById('totalNum').textContent = answered;
+  const pct = deck.length > 0 ? Math.round((idx / deck.length) * 100) : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+}
+
+function render() {
+  if (idx >= deck.length) { renderEnd(); return; }
+  answeredThis = false;
+  const q = deck[idx];
+  const total = deck.length;
+  updateScore();
+
+  // Find chapter color
+  const chId = q._chId || curChapterId;
+  const chIdx = CHAPTERS.findIndex(c => c.id === chId);
+  const color = COLORS[chIdx >= 0 ? chIdx % COLORS.length : 0];
+
+  let optsHtml = q.o.map((o, i) =>
+    `<button class="opt" id="opt${i}" onclick="pick(${i})"><span class="opt-lbl">${LABELS[i]}</span><span>${o}</span></button>`
+  ).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="qcard">
+      <div class="qnum">题目 ${idx + 1} / ${total}</div>
+      <div class="qtxt">${q.q}</div>
+      <div class="opts">${optsHtml}</div>
+      <div class="fb" id="fb"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="prevQ()" ${idx === 0 ? 'disabled' : ''}>← 上一题</button>
+        <button class="nav-btn primary" id="nxtBtn" onclick="nextQ()" disabled>${idx === total - 1 ? '查看结果 →' : '下一题 →'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function pick(i) {
+  if (answeredThis) return;
+  answeredThis = true;
+  const q = deck[idx];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.disabled = true);
+  answered++;
+  const fb = document.getElementById('fb');
+  if (i === q.a) {
+    correct++;
+    opts[i].classList.add('correct');
+    fb.textContent = '✓ 正确！';
+    fb.className = 'fb ok';
+    delete wrongIds[q._key];
+  } else {
+    opts[i].classList.add('wrong');
+    opts[q.a].classList.add('reveal');
+    fb.textContent = `✗ 错误，正确答案是 ${LABELS[q.a]}`;
+    fb.className = 'fb no';
+    wrongIds[q._key] = true;
+  }
+  document.getElementById('nxtBtn').disabled = false;
+  updateScore();
+  updateTopbar();
+}
+
+function nextQ() { idx++; answeredThis = false; render(); }
+function prevQ() { if (idx > 0) { idx--; answeredThis = false; render(); } }
+
+function renderEnd() {
+  document.getElementById('progFill').style.width = '100%';
+  const pct = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+  let grade, gcolor;
+  if (pct >= 90) { grade = '优秀 🎉'; gcolor = '#3dba7c'; }
+  else if (pct >= 75) { grade = '良好 👍'; gcolor = '#4e7ef7'; }
+  else if (pct >= 60) { grade = '及格 📚'; gcolor = '#f5a623'; }
+  else { grade = '需要复习 💪'; gcolor = '#e05a5a'; }
+  const wCount = Object.keys(wrongIds).length;
+  document.getElementById('content').innerHTML = `
+    <div class="end">
+      <div class="end-pct" style="color:${gcolor}">${pct}%</div>
+      <div class="end-grade">${grade} · 共 ${answered} 题，答对 ${correct} 题</div>
+      <div class="end-cards">
+        <div class="end-card"><div class="end-n" style="color:var(--green)">${correct}</div><div class="end-l">答对</div></div>
+        <div class="end-card"><div class="end-n" style="color:var(--red)">${answered - correct}</div><div class="end-l">答错</div></div>
+        <div class="end-card"><div class="end-n" style="color:var(--amber)">${wCount}</div><div class="end-l">错题库</div></div>
+      </div>
+      <div class="end-btns">
+        <button class="nav-btn" onclick="restartSame()">重新练习（本轮）</button>
+        ${wCount > 0 ? `<button class="nav-btn primary" onclick="startWrongOnly()">专练错题 (${wCount}题)</button>` : ''}
+        <button class="nav-btn" onclick="showWelcome();buildSidebar()">返回主页</button>
+      </div>
+    </div>
+  `;
+}
+
+function restartSame() {
+  if (wrongOnly) { startWrongOnly(); return; }
+  if (mode === 'mixed') { startMixed(); return; }
+  startChapter(curChapterId);
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', function(e) {
+  // Ignore if focus is on a button/input to avoid conflicts
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  // 1/2/3/4 → pick option A/B/C/D
+  if (['1','2','3','4'].includes(e.key)) {
+    const i = parseInt(e.key) - 1;
+    const btn = document.getElementById('opt' + i);
+    if (btn && !btn.disabled) pick(i);
+    return;
+  }
+  // Space → next question (only if answered)
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    const nxt = document.getElementById('nxtBtn');
+    if (nxt && !nxt.disabled) nextQ();
+    return;
+  }
+});
+
+init();
+</script>
+
+</body>
+</html>
